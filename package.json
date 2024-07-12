@@ -1,5 +1,5 @@
 {
-  "name": "flammejs",
+  "name": "flammejs-project",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -10,6 +10,10 @@
   "author": "",
   "license": "ISC",
   "workspaces": [
-    "packages/*"
-  ]
+    "packages/*",
+    "playground"
+  ],
+  "devDependencies": {
+    "prettier": "^3.3.2"
+  }
 }
