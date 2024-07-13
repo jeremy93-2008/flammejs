@@ -70,8 +70,11 @@ Temporary Items
 .build-*
 .env
 .netlify
+.flamme
 
 fixtures-temp
 .pnpm-store
 eslint-typegen.d.ts
 .eslintcache
+
+*.template.*

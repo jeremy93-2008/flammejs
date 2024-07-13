@@ -1,9 +1,10 @@
 import { defineCommand } from 'citty'
-import { listen } from 'listhen'
+import { listenAndWatch } from 'listhen'
 import { useFlammeConfig } from '../../hooks/useFlammeConfig'
 import { build } from 'esbuild'
 import path from 'node:path'
 import { useFlammeCurrentDirectory } from '../../hooks/useFlammeCurrentDirectory'
+
 export default defineCommand({
     meta: {
         name: 'dev',
@@ -20,26 +21,31 @@ export default defineCommand({
     run: async ({ args }) => {
         const { config } = await useFlammeConfig()
         const { currentDirectory } = await useFlammeCurrentDirectory()
+        const entrypointPath = path.resolve(currentDirectory, config.serverDir ?? 'src/server', 'index')
 
         const entryPointContent = `
-            import { createApp, createRouter, eventHandler } from 'h3'
+            import { createApp, createRouter, defineEventHandler } from 'h3'
             import { resolve } from 'path'
-            import entrypoint from "${path.resolve(currentDirectory, config.serverDir ?? 'src/server', 'index')}"
+            import entrypoint from "${entrypointPath}"
             
-            export default async function Entrypoint() {            
-                const app = createApp()
+            const app = createApp()
             
-                // Create a new router and register it in app
-                const router = createRouter()
-                app.use(router)
-                
-                console.log('Hello, Flamme!')
+            // Create a new router and register it in app
+            const router = createRouter()
+            app.use(router)
             
-                // Register the default entrypoint
-                app.use(eventHandler(() => {
-                    return entrypoint()
-                }))
-            }
+            console.log('Hello, Flamme!')
+            
+            // Register custom values for context
+            app.use(defineEventHandler((event) => {
+                event.context.app = app
+                event.context.router = router
+            }))
+        
+            // Register the default entrypoint
+            app.use(defineEventHandler(entrypoint))
+            
+            export default app;
         `
 
         await build({
@@ -50,18 +56,13 @@ export default defineCommand({
                 loader: 'ts',
             },
             bundle: true,
-            outfile: path.resolve(currentDirectory, 'dist', 'server.js'),
+            outfile: path.resolve(currentDirectory, '.flamme', 'server.js'),
             platform: 'node',
             packages: 'external',
+            external: ['h3', 'path', entrypointPath],
         })
 
-        const compiledEntrypoint = await import(
-            path.resolve(currentDirectory, 'dist', 'server.js')
-        )
-
-        console.log(compiledEntrypoint)
-
-        await listen(compiledEntrypoint.default.default, {
+        await listenAndWatch(path.resolve(currentDirectory, '.flamme', 'server.js'), {
             port: parseInt(args.port) ?? config.devServerPort ?? 3000,
         })
     },

@@ -1,10 +1,8 @@
-interface FlammeEntryParams {
-    App: any
-    event: any
-    router: any
-}
+import { type H3Event, useRouter } from 'flamme'
 
-export default function entry(params: FlammeEntryParams) {
+export default function entry(event: H3Event) {
     console.log('Hello, Flamme! From server entrypoint.')
+    console.log(event)
+    console.log('Router:', useRouter(event))
     return 'Hello, Flamme!'
 }
