@@ -2,10 +2,10 @@ export default {
     clientDir: 'src/client',
     serverDir: 'src/server',
 
-    baseUrl: '/',
+    baseUrl: '',
     serverBaseUrl: '/api',
 
-    buildDir: '.flamme',
+    buildDir: 'dist',
     publicDir: 'public',
     publicPath: '/',
 

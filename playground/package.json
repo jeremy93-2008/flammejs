@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "node ../packages/flamme/dist/cli/index.js dev",
     "debug": "node inspect ../packages/flamme/dist/cli/index.js dev",
+    "build": "node ../packages/flamme/dist/cli/index.js build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

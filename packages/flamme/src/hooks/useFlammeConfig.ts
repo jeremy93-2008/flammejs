@@ -1,7 +1,7 @@
 import { loadConfig } from 'c12'
 import { useFlammeCurrentDirectory } from './useFlammeCurrentDirectory'
 
-interface IFlammeConfigFile {
+export interface IFlammeConfigFile {
     clientDir?: string
     serverDir?: string
 
@@ -26,7 +26,7 @@ export async function useFlammeConfig() {
             clientDir: 'src/client',
             serverDir: 'src/server',
 
-            baseUrl: '/',
+            baseUrl: '',
             serverBaseUrl: '/api',
 
             buildDir: '.flamme',

@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { useState } from 'react'
 
 export default function Index() {
+    const [counter, setCopnter] = useState(0)
     return (
         <html>
             <head>
@@ -14,7 +15,11 @@ export default function Index() {
             </head>
             <body>
                 <div>
-                    <h1>Hello, Flamme!</h1>
+                    <h1>Hello, Flamme 2!</h1>
+                    <p>Counter: {counter}</p>
+                    <button onClick={() => setCopnter(counter + 1)}>
+                        Increment
+                    </button>
                     <p>
                         This is a React component in{' '}
                         <code>src/client/index.tsx</code>.
