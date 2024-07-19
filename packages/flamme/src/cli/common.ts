@@ -6,6 +6,8 @@ import colors from 'colors/safe'
 import { rimraf } from 'rimraf'
 import { useFlammeCurrentDirectory } from '../hooks/useFlammeCurrentDirectory'
 import { useFlammeBuildMode } from '../hooks/useFlammeBuildMode'
+import { tailwindPlugin } from 'esbuild-plugin-tailwindcss'
+import CssModulesPlugin from 'esbuild-css-modules-plugin'
 
 // browser client build + server - ssr build
 export async function buildEndpoint({
@@ -55,19 +57,38 @@ export async function buildClientEndpoint({
     entryPointContent: string
     buildClientPath: string
 }) {
+    const { currentDirectory } = await useFlammeCurrentDirectory()
     return await build({
         stdin: {
             contents: entryPointContent,
-            resolveDir: path.resolve(__dirname, '../../src/core'),
+            resolveDir: currentDirectory,
             sourcefile: 'client.ts',
             loader: 'ts',
         },
+        absWorkingDir: currentDirectory,
         bundle: true,
         outfile: buildClientPath,
         minify: mode === 'production',
         jsx: 'transform',
         platform: 'browser',
         allowOverwrite: true,
+        plugins: [
+            CssModulesPlugin({
+                // @see https://github.com/indooorsman/esbuild-css-modules-plugin/blob/main/index.d.ts for more details
+                force: true,
+                emitDeclarationFile: false,
+                localsConvention: 'camelCaseOnly',
+                namedExports: true,
+                inject: false,
+            }),
+            tailwindPlugin({
+                cssModulesEnabled: true,
+                configPath: path.resolve(
+                    currentDirectory,
+                    'tailwind.config.js'
+                ),
+            }),
+        ],
     })
 }
 
@@ -80,18 +101,30 @@ export async function buildServerEndpoint({
     entryPointContent: string
     buildServerPath: string
 }) {
+    const { currentDirectory } = await useFlammeCurrentDirectory()
     return await build({
         stdin: {
             contents: entryPointContent,
-            resolveDir: path.resolve(__dirname, '../../src/core'),
+            resolveDir: currentDirectory,
             sourcefile: 'server.ts',
             loader: 'ts',
         },
+        absWorkingDir: currentDirectory,
         bundle: true,
         outfile: buildServerPath,
         minify: mode === 'production',
         platform: 'node',
         allowOverwrite: true,
+        plugins: [
+            CssModulesPlugin({
+                // @see https://github.com/indooorsman/esbuild-css-modules-plugin/blob/main/index.d.ts for more details
+                force: true,
+                emitDeclarationFile: false,
+                localsConvention: 'camelCaseOnly',
+                namedExports: true,
+                inject: false,
+            }),
+        ],
     })
 }
 
@@ -104,6 +137,7 @@ export async function listenServer({
     port: number
     reload?: boolean
 }) {
+    // @ts-ignore
     const import_app = await import(buildServerPath)
 
     const listener = await listen(toNodeListener(import_app.default.default), {

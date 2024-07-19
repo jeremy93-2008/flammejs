@@ -1,4 +1,4 @@
-import { type H3Event } from 'flamme'
+import { type H3Event } from 'flamme/server'
 
 export default function entry(event: H3Event) {
     return 'Hello, Flamme API!'

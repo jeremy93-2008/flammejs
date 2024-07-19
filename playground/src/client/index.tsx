@@ -1,7 +1,10 @@
 import React, { useState } from 'react'
+import { FlammeAssets } from 'flamme/client'
+import { hello } from './styles.modules.css'
+import './styles.css'
 
 export default function Index() {
-    const [counter, setCopnter] = useState(0)
+    const [counter, setCounter] = useState(0)
     return (
         <html>
             <head>
@@ -10,14 +13,14 @@ export default function Index() {
                     name="viewport"
                     content="width=device-width, initial-scale=1"
                 />
-                <link rel="stylesheet" href="/styles.css"></link>
                 <title>My app</title>
+                <FlammeAssets />
             </head>
             <body>
-                <div>
-                    <h1>Hello, Flamme 2!</h1>
-                    <p>Counter: {counter}</p>
-                    <button onClick={() => setCopnter(counter + 1)}>
+                <div className="app">
+                    <h1 className="text-3xl">Hello, Flamme 2!</h1>
+                    <p className={hello}>Counter: {counter}</p>
+                    <button onClick={() => setCounter(counter + 1)}>
                         Increment
                     </button>
                     <p>

@@ -35,7 +35,7 @@ export default defineCommand({
 
         // browser client build + server - ssr build
         await buildEndpoint({
-            entryPointClientContent: getEntryPointClientContent(),
+            entryPointClientContent: getEntryPointClientContent({ hashKey }),
             entryPointServerContent: getEntryPointServerContent({
                 hashKey,
             }),

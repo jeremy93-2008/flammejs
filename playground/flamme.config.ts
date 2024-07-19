@@ -10,4 +10,8 @@ export default {
     publicPath: '/',
 
     devServerPort: 3000,
+
+    esbuild: {
+        plugins: [],
+    },
 }

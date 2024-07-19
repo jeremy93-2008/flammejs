@@ -8,8 +8,25 @@
     "flamme": "./dist/cli.js"
   },
   "scripts": {
-    "build": "tsup-node src/core/index.ts src/cli/index.ts --dts --format esm,cjs",
+    "build": "tsup-node src/core/index.client.ts src/core/index.server.ts src/cli/index.ts --dts --format esm,cjs",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/core/index.client.mjs",
+      "require": "./dist/core/index.client.js",
+      "types": "./dist/core/index.client.d.ts"
+    },
+    "./server": {
+      "import": "./dist/core/index.server.mjs",
+      "require": "./dist/core/index.server.js",
+      "types": "./dist/core/index.server.d.ts"
+    },
+    "./client": {
+      "import": "./dist/core/index.client.mjs",
+      "require": "./dist/core/index.client.js",
+      "types": "./dist/core/index.client.d.ts"
+    }
   },
   "keywords": [],
   "author": "",
@@ -20,6 +37,7 @@
     "citty": "^0.1.6",
     "colors": "^1.4.0",
     "esbuild": "^0.23.0",
+    "esbuild-css-modules-plugin": "^3.1.2",
     "h3": "^1.12.0",
     "hookable": "^5.5.3",
     "ofetch": "^1.3.4",
@@ -33,6 +51,7 @@
     "@types/node": "^20.14.10",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
+    "esbuild-plugin-tailwindcss": "^1.2.0",
     "tsup": "^8.1.0",
     "typescript": "^5.5.3"
   }

@@ -24,27 +24,23 @@ export async function createFlamme() {
 
     let hashKey = hash(performance.now())
 
+    const outPath = path.resolve(
+        currentDirectory,
+        mode === 'development' ? '.flamme' : config.buildDir
+    )
+
     const buildClientPath = (hash?: string) =>
-        path.resolve(
-            currentDirectory,
-            mode === 'development' ? '.flamme' : config.buildDir,
-            hash ? `client.${hash}.js` : 'client.js'
-        )
+        path.resolve(outPath, hash ? `client.${hash}.js` : 'client.js')
 
     const buildServerPath = (hash?: string) =>
-        path.resolve(
-            currentDirectory,
-            mode === 'development' ? '.flamme' : config.buildDir,
-            hash ? `server.${hash}.js` : 'server.js'
-        )
+        path.resolve(outPath, hash ? `server.${hash}.js` : 'server.js')
 
     const { getEntryPointClientContent, getEntryPointServerContent } =
-        createFlammeEntrypoints({
+        await createFlammeEntrypoints({
             entrypointClientPath,
             entrypointServerPath,
-            buildClientPath,
+            outPath,
             config,
-            hashKey,
         })
 
     return {
