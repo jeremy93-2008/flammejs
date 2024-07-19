@@ -2,6 +2,9 @@ import React, { useState } from 'react'
 import { FlammeAssets } from 'flamme/client'
 import { hello } from './styles.modules.css'
 import './styles.css'
+import './estilo.scss'
+import './lestyle.less'
+import './style.styl'
 
 export default function Index() {
     const [counter, setCounter] = useState(0)

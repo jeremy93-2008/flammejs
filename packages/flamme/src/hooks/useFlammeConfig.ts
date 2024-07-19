@@ -1,6 +1,10 @@
 import { type Plugin } from 'esbuild'
 import { loadConfig } from 'c12'
 import { useFlammeCurrentDirectory } from './useFlammeCurrentDirectory'
+import CSSModules from 'esbuild-css-modules-plugin'
+import { type SassPluginOptions } from 'esbuild-sass-plugin'
+// @ts-ignore
+import { stylusLoader } from 'esbuild-stylus-loader'
 
 export interface IFlammeConfigFile {
     clientDir?: string
@@ -15,9 +19,14 @@ export interface IFlammeConfigFile {
 
     devServerPort?: number
 
-    tailwindcss?: {
-        enabled: boolean
-        configPath?: string
+    css: {
+        cssModules?: Parameters<typeof CSSModules>[0]
+        sass?: SassPluginOptions
+        less?: Less.Options
+        stylus?: Parameters<typeof stylusLoader>[0]
+        tailwindcss?: {
+            configPath?: string
+        }
     }
 
     esbuild?: {
@@ -45,8 +54,22 @@ export async function useFlammeConfig() {
 
             devServerPort: 3000,
 
-            tailwindcss: {
-                enabled: false,
+            css: {
+                cssModules: {
+                    // @see https://github.com/indooorsman/esbuild-css-modules-plugin/blob/main/index.d.ts for more details
+                    force: true,
+                    emitDeclarationFile: false,
+                    localsConvention: 'camelCaseOnly',
+                    namedExports: true,
+                    inject: false,
+                },
+                sass: {
+                    filter: /\.scss$/,
+                    type: 'css',
+                },
+                less: {},
+                stylus: {},
+                tailwindcss: {},
             },
 
             esbuild: {

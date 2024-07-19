@@ -14,7 +14,7 @@ export default defineCommand({
         port: {
             type: 'string',
             description: 'Port to listen to',
-            default: '3000',
+            required: false,
         },
     },
     run: async ({ args }) => {
@@ -52,7 +52,7 @@ export default defineCommand({
             buildServerPath,
             hashKey,
             config,
-            port: args.port,
+            port: args.port ? Number(args.port) : config.devServerPort,
         })
     },
 })

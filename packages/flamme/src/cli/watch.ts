@@ -16,7 +16,7 @@ interface IWatchAndListenFlammeParams {
     getEntryPointServerContent: ({ hashKey }: { hashKey: string }) => string
     hashKey: string
     config: Required<IFlammeConfigFile>
-    port: string
+    port: number
 }
 
 export async function watchAndListenFlamme(
@@ -60,14 +60,14 @@ export async function watchAndListenFlamme(
 
         listener = await listenServer({
             buildServerPath: buildServerPath(newHashKey),
-            port: parseInt(port) ?? config.devServerPort,
+            port,
             reload: true,
         })
     })
 
     listener = await listenServer({
         buildServerPath: buildServerPath(hashKey),
-        port: parseInt(port) ?? config.devServerPort,
+        port,
     })
 
     console.log('👀 Watching', colors.green('/src'), 'for files changes...')

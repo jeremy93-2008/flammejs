@@ -3,8 +3,12 @@ import path from 'node:path'
 import { rimraf } from 'rimraf'
 import { useFlammeCurrentDirectory } from '../hooks/useFlammeCurrentDirectory'
 import { useFlammeBuildMode } from '../hooks/useFlammeBuildMode'
-import { tailwindPlugin } from 'esbuild-plugin-tailwindcss'
 import CssModulesPlugin from 'esbuild-css-modules-plugin'
+import { sassPlugin } from 'esbuild-sass-plugin'
+import { lessLoader } from 'esbuild-plugin-less'
+// @ts-ignore
+import { stylusLoader } from 'esbuild-stylus-loader'
+import { tailwindPlugin } from 'esbuild-plugin-tailwindcss'
 import { IFlammeConfigFile, useFlammeConfig } from '../hooks/useFlammeConfig'
 import * as fs from 'node:fs'
 
@@ -61,20 +65,20 @@ function getBuildPlugins(
 ) {
     // create plugin array for esbuild, based on the configuration
     const plugins: Plugin[] = [
-        CssModulesPlugin({
-            // @see https://github.com/indooorsman/esbuild-css-modules-plugin/blob/main/index.d.ts for more details
-            force: true,
-            emitDeclarationFile: false,
-            localsConvention: 'camelCaseOnly',
-            namedExports: true,
-            inject: false,
-        }),
+        CssModulesPlugin(config.css.cssModules),
+        sassPlugin(config.css.sass),
+        lessLoader(config.css.less),
+        stylusLoader(config.css.stylus),
     ]
+
+    // tailwindcss configuration path
     const tailwindcssConfigPath = path.resolve(
         currentDirectory,
-        config.tailwindcss.configPath ?? 'tailwind.config.js'
+        config.css.tailwindcss?.configPath ?? 'tailwind.config.js'
     )
-    if (config.tailwindcss.enabled && fs.existsSync(tailwindcssConfigPath)) {
+
+    // add tailwindcss plugin if enabled and configuration file exists
+    if (fs.existsSync(tailwindcssConfigPath)) {
         plugins.push(
             tailwindPlugin({
                 cssModulesEnabled: true,
@@ -82,7 +86,7 @@ function getBuildPlugins(
             })
         )
     }
-    return plugins
+    return [...plugins, ...config.esbuild.plugins]
 }
 
 export async function buildClientEndpoint({

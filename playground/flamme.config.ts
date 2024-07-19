@@ -1,4 +1,6 @@
-export default {
+import { defineFlammeConfig } from 'flamme'
+
+export default defineFlammeConfig({
     clientDir: 'src/client',
     serverDir: 'src/server',
 
@@ -11,12 +13,13 @@ export default {
 
     devServerPort: 3000,
 
-    tailwindcss: {
-        enabled: true,
-        configPath: 'tailwind.config.js',
+    css: {
+        tailwindcss: {
+            configPath: 'tailwind.config.js',
+        },
     },
 
     esbuild: {
         plugins: [],
     },
-}
+})
