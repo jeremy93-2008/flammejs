@@ -1,13 +1,12 @@
-import { build } from 'esbuild'
+import { build, Plugin } from 'esbuild'
 import path from 'node:path'
-import { listen } from 'listhen'
-import { toNodeListener } from 'h3'
-import colors from 'colors/safe'
 import { rimraf } from 'rimraf'
 import { useFlammeCurrentDirectory } from '../hooks/useFlammeCurrentDirectory'
 import { useFlammeBuildMode } from '../hooks/useFlammeBuildMode'
 import { tailwindPlugin } from 'esbuild-plugin-tailwindcss'
 import CssModulesPlugin from 'esbuild-css-modules-plugin'
+import { IFlammeConfigFile, useFlammeConfig } from '../hooks/useFlammeConfig'
+import * as fs from 'node:fs'
 
 // browser client build + server - ssr build
 export async function buildEndpoint({
@@ -21,17 +20,24 @@ export async function buildEndpoint({
     buildClientPath: string
     buildServerPath: string
 }) {
+    // get current directory
+    const { currentDirectory } = await useFlammeCurrentDirectory()
+    // get config
+    const { config } = await useFlammeConfig()
     // get build mode
     const [mode] = useFlammeBuildMode()
 
     // clean build
     if (mode === 'development') await cleanBuildEndpoint()
 
+    const plugins = getBuildPlugins(currentDirectory, config)
+
     // browser client build
     await buildClientEndpoint({
         mode: mode ?? 'development',
         entryPointContent: entryPointClientContent,
         buildClientPath,
+        plugins,
     })
 
     // server + ssr build
@@ -39,6 +45,7 @@ export async function buildEndpoint({
         mode: mode ?? 'development',
         entryPointContent: entryPointServerContent,
         buildServerPath,
+        plugins,
     })
 }
 
@@ -48,16 +55,49 @@ export async function cleanBuildEndpoint() {
     await rimraf.rimraf(path.resolve(currentDirectory, '.flamme'))
 }
 
+function getBuildPlugins(
+    currentDirectory: string,
+    config: Required<IFlammeConfigFile>
+) {
+    // create plugin array for esbuild, based on the configuration
+    const plugins: Plugin[] = [
+        CssModulesPlugin({
+            // @see https://github.com/indooorsman/esbuild-css-modules-plugin/blob/main/index.d.ts for more details
+            force: true,
+            emitDeclarationFile: false,
+            localsConvention: 'camelCaseOnly',
+            namedExports: true,
+            inject: false,
+        }),
+    ]
+    const tailwindcssConfigPath = path.resolve(
+        currentDirectory,
+        config.tailwindcss.configPath ?? 'tailwind.config.js'
+    )
+    if (config.tailwindcss.enabled && fs.existsSync(tailwindcssConfigPath)) {
+        plugins.push(
+            tailwindPlugin({
+                cssModulesEnabled: true,
+                configPath: tailwindcssConfigPath,
+            })
+        )
+    }
+    return plugins
+}
+
 export async function buildClientEndpoint({
     mode,
     entryPointContent,
     buildClientPath,
+    plugins,
 }: {
     mode: 'production' | 'development'
     entryPointContent: string
     buildClientPath: string
+    plugins: Plugin[]
 }) {
     const { currentDirectory } = await useFlammeCurrentDirectory()
+
     return await build({
         stdin: {
             contents: entryPointContent,
@@ -72,23 +112,7 @@ export async function buildClientEndpoint({
         jsx: 'transform',
         platform: 'browser',
         allowOverwrite: true,
-        plugins: [
-            CssModulesPlugin({
-                // @see https://github.com/indooorsman/esbuild-css-modules-plugin/blob/main/index.d.ts for more details
-                force: true,
-                emitDeclarationFile: false,
-                localsConvention: 'camelCaseOnly',
-                namedExports: true,
-                inject: false,
-            }),
-            tailwindPlugin({
-                cssModulesEnabled: true,
-                configPath: path.resolve(
-                    currentDirectory,
-                    'tailwind.config.js'
-                ),
-            }),
-        ],
+        plugins,
     })
 }
 
@@ -96,10 +120,12 @@ export async function buildServerEndpoint({
     mode,
     entryPointContent,
     buildServerPath,
+    plugins,
 }: {
     mode: 'production' | 'development'
     entryPointContent: string
     buildServerPath: string
+    plugins: Plugin[]
 }) {
     const { currentDirectory } = await useFlammeCurrentDirectory()
     return await build({
@@ -115,38 +141,6 @@ export async function buildServerEndpoint({
         minify: mode === 'production',
         platform: 'node',
         allowOverwrite: true,
-        plugins: [
-            CssModulesPlugin({
-                // @see https://github.com/indooorsman/esbuild-css-modules-plugin/blob/main/index.d.ts for more details
-                force: true,
-                emitDeclarationFile: false,
-                localsConvention: 'camelCaseOnly',
-                namedExports: true,
-                inject: false,
-            }),
-        ],
+        plugins,
     })
-}
-
-export async function listenServer({
-    buildServerPath,
-    port,
-    reload,
-}: {
-    buildServerPath: string
-    port: number
-    reload?: boolean
-}) {
-    // @ts-ignore
-    const import_app = await import(buildServerPath)
-
-    const listener = await listen(toNodeListener(import_app.default.default), {
-        port,
-        _entry: buildServerPath,
-        showURL: !reload,
-    })
-
-    if (reload) console.log(`🔄 Server reload at`, colors.blue(listener.url))
-
-    return listener
 }

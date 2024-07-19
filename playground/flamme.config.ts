@@ -11,6 +11,11 @@ export default {
 
     devServerPort: 3000,
 
+    tailwindcss: {
+        enabled: true,
+        configPath: 'tailwind.config.js',
+    },
+
     esbuild: {
         plugins: [],
     },

@@ -5,7 +5,8 @@ import { rimraf } from 'rimraf'
 import colors from 'colors/safe'
 import path from 'node:path'
 import { type IFlammeConfigFile } from '../hooks/useFlammeConfig'
-import { buildEndpoint, listenServer } from './common'
+import { buildEndpoint } from './build'
+import { listenServer } from './listen'
 
 interface IWatchAndListenFlammeParams {
     currentDirectory: string

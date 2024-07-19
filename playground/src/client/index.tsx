@@ -20,7 +20,10 @@ export default function Index() {
                 <div className="app">
                     <h1 className="text-3xl">Hello, Flamme 2!</h1>
                     <p className={hello}>Counter: {counter}</p>
-                    <button onClick={() => setCounter(counter + 1)}>
+                    <button
+                        className="bg-blue-300 px-3 py-1 rounded-md"
+                        onClick={() => setCounter(counter + 1)}
+                    >
                         Increment
                     </button>
                     <p>

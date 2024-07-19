@@ -1,7 +1,7 @@
 import { defineCommand } from 'citty'
 import { createFlamme } from '../flamme'
 import { watchAndListenFlamme } from '../watch'
-import { buildEndpoint } from '../common'
+import { buildEndpoint } from '../build'
 import { useFlammeBuildMode } from '../../hooks/useFlammeBuildMode'
 
 export default defineCommand({

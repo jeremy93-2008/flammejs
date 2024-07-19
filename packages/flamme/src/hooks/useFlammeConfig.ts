@@ -1,3 +1,4 @@
+import { type Plugin } from 'esbuild'
 import { loadConfig } from 'c12'
 import { useFlammeCurrentDirectory } from './useFlammeCurrentDirectory'
 
@@ -13,6 +14,15 @@ export interface IFlammeConfigFile {
     publicPath?: string
 
     devServerPort?: number
+
+    tailwindcss?: {
+        enabled: boolean
+        configPath?: string
+    }
+
+    esbuild?: {
+        plugins: Plugin[]
+    }
 }
 
 export async function useFlammeConfig() {
@@ -34,6 +44,14 @@ export async function useFlammeConfig() {
             publicPath: '/',
 
             devServerPort: 3000,
+
+            tailwindcss: {
+                enabled: false,
+            },
+
+            esbuild: {
+                plugins: [],
+            },
         },
     })
 }
