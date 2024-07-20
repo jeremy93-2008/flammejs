@@ -73,11 +73,6 @@ export async function createFlammeEntrypoints({
             // Register the server single entrypoint
             app.use("${config.serverBaseUrl}",defineEventHandler(entrypointServer))
             
-            app.use('/_flamme/manifest', defineEventHandler((event) => {
-                setResponseHeader(event, "content-type", "application/json");
-                return '{"buildId":${hashKey}}';
-            }))
-            
             // Register the static assets created by the build
             app.use(
                 '/_flamme/assets',

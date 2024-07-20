@@ -1,10 +1,14 @@
 import React, { useState } from 'react'
 import { FlammeAssets } from 'flamme/client'
-import { hello } from './styles.modules.css'
+import { hello } from './styles.module.css'
 import './styles.css'
 import './estilo.scss'
 import './lestyle.less'
 import './style.styl'
+
+import json from './file.json'
+
+import pikachu from './assets/pikachu.png'
 
 export default function Index() {
     const [counter, setCounter] = useState(0)
@@ -37,6 +41,9 @@ export default function Index() {
                         It is rendered SSR by the server and hydrated by the
                         client.
                     </p>
+                    <p>{JSON.stringify(json, undefined, 4)}</p>
+                    <img src={pikachu} alt="pikachu" />
+                    <img src="./_flamme/assets/marek.jpg" alt="marek" />
                 </div>
             </body>
         </html>

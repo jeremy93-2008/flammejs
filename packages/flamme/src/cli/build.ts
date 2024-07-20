@@ -1,5 +1,6 @@
-import { build, Plugin } from 'esbuild'
+import { build, type Loader, type Plugin } from 'esbuild'
 import path from 'node:path'
+import * as fs from 'node:fs'
 import { rimraf } from 'rimraf'
 import { useFlammeCurrentDirectory } from '../hooks/useFlammeCurrentDirectory'
 import { useFlammeBuildMode } from '../hooks/useFlammeBuildMode'
@@ -9,8 +10,23 @@ import { lessLoader } from 'esbuild-plugin-less'
 // @ts-ignore
 import { stylusLoader } from 'esbuild-stylus-loader'
 import { tailwindPlugin } from 'esbuild-plugin-tailwindcss'
+import { copy } from 'esbuild-plugin-copy'
 import { IFlammeConfigFile, useFlammeConfig } from '../hooks/useFlammeConfig'
-import * as fs from 'node:fs'
+
+export interface IBuildEndpointParams {
+    entryPointClientContent: string
+    entryPointServerContent: string
+    buildClientPath: string
+    buildServerPath: string
+}
+
+export interface ISingleBuildEndpointParams {
+    mode: 'production' | 'development'
+    entryPointContent: string
+    buildPath: string
+    plugins: Plugin[]
+    loader: Record<string, Loader>
+}
 
 // browser client build + server - ssr build
 export async function buildEndpoint({
@@ -18,12 +34,7 @@ export async function buildEndpoint({
     entryPointServerContent,
     buildClientPath,
     buildServerPath,
-}: {
-    entryPointClientContent: string
-    entryPointServerContent: string
-    buildClientPath: string
-    buildServerPath: string
-}) {
+}: IBuildEndpointParams) {
     // get current directory
     const { currentDirectory } = await useFlammeCurrentDirectory()
     // get config
@@ -34,13 +45,15 @@ export async function buildEndpoint({
     // clean build
     if (mode === 'development') await cleanBuildEndpoint()
 
+    const loader = getBuildLoader(config)
     const plugins = getBuildPlugins(currentDirectory, config)
 
     // browser client build
     await buildClientEndpoint({
         mode: mode ?? 'development',
         entryPointContent: entryPointClientContent,
-        buildClientPath,
+        buildPath: buildClientPath,
+        loader,
         plugins,
     })
 
@@ -48,7 +61,8 @@ export async function buildEndpoint({
     await buildServerEndpoint({
         mode: mode ?? 'development',
         entryPointContent: entryPointServerContent,
-        buildServerPath,
+        buildPath: buildServerPath,
+        loader,
         plugins,
     })
 }
@@ -63,7 +77,9 @@ function getBuildPlugins(
     currentDirectory: string,
     config: Required<IFlammeConfigFile>
 ) {
-    // create plugin array for esbuild, based on the configuration
+    const [mode] = useFlammeBuildMode()
+
+    // Create plugin array for esbuild, based on the configuration
     const plugins: Plugin[] = [
         CssModulesPlugin(config.css.cssModules),
         sassPlugin(config.css.sass),
@@ -71,13 +87,35 @@ function getBuildPlugins(
         stylusLoader(config.css.stylus),
     ]
 
-    // tailwindcss configuration path
+    // Add public folder copy plugin if exists
+    if (fs.existsSync(path.resolve(currentDirectory, config.publicDir))) {
+        plugins.push(
+            copy({
+                assets: [
+                    {
+                        from: path.resolve(
+                            currentDirectory,
+                            config.publicDir,
+                            '**',
+                            '*'
+                        ),
+                        to: path.resolve(
+                            currentDirectory,
+                            mode === 'development' ? '.flamme' : config.buildDir
+                        ),
+                    },
+                ],
+            })
+        )
+    }
+
+    // Tailwindcss configuration path
     const tailwindcssConfigPath = path.resolve(
         currentDirectory,
         config.css.tailwindcss?.configPath ?? 'tailwind.config.js'
     )
 
-    // add tailwindcss plugin if enabled and configuration file exists
+    // Add tailwindcss plugin if enabled and configuration file exists
     if (fs.existsSync(tailwindcssConfigPath)) {
         plugins.push(
             tailwindPlugin({
@@ -89,18 +127,39 @@ function getBuildPlugins(
     return [...plugins, ...config.esbuild.plugins]
 }
 
+const getBuildLoader = (
+    config: Required<IFlammeConfigFile>
+): Record<string, Loader> => {
+    return {
+        '.png': 'file',
+        '.jpg': 'file',
+        '.gif': 'file',
+        '.svg': 'file',
+        '.woff': 'file',
+        '.woff2': 'file',
+        '.eot': 'file',
+        '.ttf': 'file',
+        '.otf': 'file',
+        '.mp4': 'file',
+        '.webm': 'file',
+        '.wav': 'file',
+        '.mp3': 'file',
+        '.m4a': 'file',
+        '.aac': 'file',
+        '.oga': 'file',
+        ...config.esbuild.loader,
+    }
+}
+
 export async function buildClientEndpoint({
     mode,
     entryPointContent,
-    buildClientPath,
+    buildPath,
     plugins,
-}: {
-    mode: 'production' | 'development'
-    entryPointContent: string
-    buildClientPath: string
-    plugins: Plugin[]
-}) {
+    loader,
+}: ISingleBuildEndpointParams) {
     const { currentDirectory } = await useFlammeCurrentDirectory()
+    const { config } = await useFlammeConfig()
 
     return await build({
         stdin: {
@@ -111,11 +170,13 @@ export async function buildClientEndpoint({
         },
         absWorkingDir: currentDirectory,
         bundle: true,
-        outfile: buildClientPath,
+        outfile: buildPath,
         minify: mode === 'production',
         jsx: 'transform',
         platform: 'browser',
         allowOverwrite: true,
+        publicPath: path.resolve(config.publicPath, '_flamme/assets'),
+        loader,
         plugins,
     })
 }
@@ -123,15 +184,13 @@ export async function buildClientEndpoint({
 export async function buildServerEndpoint({
     mode,
     entryPointContent,
-    buildServerPath,
+    buildPath,
     plugins,
-}: {
-    mode: 'production' | 'development'
-    entryPointContent: string
-    buildServerPath: string
-    plugins: Plugin[]
-}) {
+    loader,
+}: ISingleBuildEndpointParams) {
     const { currentDirectory } = await useFlammeCurrentDirectory()
+    const { config } = await useFlammeConfig()
+
     return await build({
         stdin: {
             contents: entryPointContent,
@@ -141,10 +200,12 @@ export async function buildServerEndpoint({
         },
         absWorkingDir: currentDirectory,
         bundle: true,
-        outfile: buildServerPath,
+        outfile: buildPath,
         minify: mode === 'production',
         platform: 'node',
         allowOverwrite: true,
+        publicPath: path.resolve(config.publicPath, '_flamme/assets'),
+        loader,
         plugins,
     })
 }

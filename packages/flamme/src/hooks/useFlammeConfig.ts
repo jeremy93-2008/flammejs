@@ -1,4 +1,4 @@
-import { type Plugin } from 'esbuild'
+import { type Loader, type Plugin } from 'esbuild'
 import { loadConfig } from 'c12'
 import { useFlammeCurrentDirectory } from './useFlammeCurrentDirectory'
 import CSSModules from 'esbuild-css-modules-plugin'
@@ -30,6 +30,7 @@ export interface IFlammeConfigFile {
     }
 
     esbuild?: {
+        loader?: Record<string, Loader>
         plugins: Plugin[]
     }
 }
