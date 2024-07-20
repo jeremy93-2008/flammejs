@@ -44,7 +44,7 @@ export async function watchAndListenFlamme(
         const newHashKey = hash(performance.now())
 
         await listener.close()
-        await rimraf.rimraf(path.resolve(currentDirectory, '.flamme'))
+        await rimraf.rimraf(path.resolve(currentDirectory, config.cacheDir))
 
         // browser client build + server - ssr build
         await buildEndpoint({

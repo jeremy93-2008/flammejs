@@ -1,15 +1,16 @@
 import { defineFlammeConfig } from 'flamme'
 
 export default defineFlammeConfig({
+    root: '/',
+    base: './',
+    serverBaseUrl: '/api',
+    assetsBaseUrl: './_flamme/assets',
+
     clientDir: 'src/client',
     serverDir: 'src/server',
-
-    baseUrl: '',
-    serverBaseUrl: '/api',
-
     buildDir: 'dist',
     publicDir: 'public',
-    publicPath: '/',
+    cacheDir: '.flamme',
 
     devServerPort: 3000,
 

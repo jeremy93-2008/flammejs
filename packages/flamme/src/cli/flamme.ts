@@ -26,7 +26,7 @@ export async function createFlamme() {
 
     const outPath = path.resolve(
         currentDirectory,
-        mode === 'development' ? '.flamme' : config.buildDir
+        mode === 'development' ? config.cacheDir : config.buildDir
     )
 
     const buildClientPath = (hash?: string) =>

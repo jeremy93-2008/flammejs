@@ -69,8 +69,9 @@ export async function buildEndpoint({
 
 export async function cleanBuildEndpoint() {
     const { currentDirectory } = await useFlammeCurrentDirectory()
+    const { config } = await useFlammeConfig()
 
-    await rimraf.rimraf(path.resolve(currentDirectory, '.flamme'))
+    await rimraf.rimraf(path.resolve(currentDirectory, config.cacheDir))
 }
 
 function getBuildPlugins(
@@ -101,7 +102,9 @@ function getBuildPlugins(
                         ),
                         to: path.resolve(
                             currentDirectory,
-                            mode === 'development' ? '.flamme' : config.buildDir
+                            mode === 'development'
+                                ? config.cacheDir
+                                : config.buildDir
                         ),
                     },
                 ],
@@ -175,7 +178,7 @@ export async function buildClientEndpoint({
         jsx: 'transform',
         platform: 'browser',
         allowOverwrite: true,
-        publicPath: path.resolve(config.publicPath, '_flamme/assets'),
+        publicPath: config.assetsBaseUrl,
         loader,
         plugins,
     })
@@ -204,7 +207,7 @@ export async function buildServerEndpoint({
         minify: mode === 'production',
         platform: 'node',
         allowOverwrite: true,
-        publicPath: path.resolve(config.publicPath, '_flamme/assets'),
+        publicPath: config.assetsBaseUrl,
         loader,
         plugins,
     })

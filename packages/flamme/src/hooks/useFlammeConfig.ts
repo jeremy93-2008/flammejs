@@ -7,30 +7,50 @@ import { type SassPluginOptions } from 'esbuild-sass-plugin'
 import { stylusLoader } from 'esbuild-stylus-loader'
 
 export interface IFlammeConfigFile {
-    clientDir?: string
-    serverDir?: string
-
-    baseUrl?: string
+    // base url
+    root?: string
+    // base path
+    base?: string
+    // server base url
     serverBaseUrl?: string
+    // assets base url
+    assetsBaseUrl?: string
 
+    // client directory
+    clientDir?: string
+    // server directory
+    serverDir?: string
+    // build directory
     buildDir?: string
+    // public directory
     publicDir?: string
-    publicPath?: string
+    // cache directory
+    cacheDir?: string
 
+    // development server port
     devServerPort?: number
 
+    // css options
     css: {
+        // css modules options
         cssModules?: Parameters<typeof CSSModules>[0]
+        // sass options
         sass?: SassPluginOptions
+        // less options
         less?: Less.Options
+        // stylus options
         stylus?: Parameters<typeof stylusLoader>[0]
+        // tailwindcss options
         tailwindcss?: {
             configPath?: string
         }
     }
 
+    // esbuild options
     esbuild?: {
+        // esbuild loaders
         loader?: Record<string, Loader>
+        // esbuild plugins
         plugins: Plugin[]
     }
 }
@@ -43,15 +63,16 @@ export async function useFlammeConfig() {
         name: 'flamme',
         dotenv: true,
         defaultConfig: {
+            root: '/',
+            base: './',
+            serverBaseUrl: '/api',
+            assetsBaseUrl: '_flamme/assets',
+
             clientDir: 'src/client',
             serverDir: 'src/server',
-
-            baseUrl: '',
-            serverBaseUrl: '/api',
-
-            buildDir: '.flamme',
+            buildDir: 'dist',
             publicDir: 'public',
-            publicPath: '/',
+            cacheDir: '.flamme',
 
             devServerPort: 3000,
 

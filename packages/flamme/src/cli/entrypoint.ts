@@ -102,7 +102,7 @@ export async function createFlammeEntrypoints({
             )
         
             //Register the client single entrypoint
-            app.use("${config.baseUrl || '/'}", defineEventHandler((event) => {
+            app.use("${config.root || '/'}", defineEventHandler((event) => {
                 const { pipe } = renderToPipeableStream(
                     React.createElement(EntrypointClient),
                     {
