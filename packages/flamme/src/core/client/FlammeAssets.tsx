@@ -1,7 +1,8 @@
 import React from 'react'
+import { useFlammeAssets } from './useFlammeAssets'
 
 export function FlammeAssets() {
-    const assetsMap = (globalThis as any).assetsMap
+    const assetsMap = useFlammeAssets()
     return (
         <>
             <script

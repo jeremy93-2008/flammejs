@@ -1,3 +1,8 @@
+declare global {
+    var assetsMap: Record<string, string>
+}
+
 export function useFlammeAssets() {
-    return {}
+    // assets map is set by the server
+    return globalThis.assetsMap
 }
