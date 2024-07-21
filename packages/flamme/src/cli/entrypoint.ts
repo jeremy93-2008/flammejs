@@ -1,5 +1,4 @@
-import { IFlammeConfigFile, useFlammeConfig } from '../hooks/useFlammeConfig'
-import { useFlammeCurrentDirectory } from '../hooks/useFlammeCurrentDirectory'
+import { IFlammeConfigFile } from '../hooks/useFlammeConfig'
 import path from 'node:path'
 import { getPublicEnv } from './env'
 interface ICreateFlammeEntrypoints {
@@ -113,6 +112,12 @@ export async function createFlammeEntrypoints({
                     })
                 })
             )
+            
+            // Register specific case of favicon request to avoid loading the client
+            app.use('/favicon.ico', defineEventHandler((event) => {
+                if(!fs.existsSync(path.join('${outPath}', "favicon.ico"))) return null
+                return fsPromises.readFile(path.join('${outPath}', "favicon.ico"))
+            }))
             
             // Register the server single entrypoint
             app.use("${config.serverBaseUrl}",defineEventHandler((event) => {

@@ -93,6 +93,7 @@ function getBuildPlugins(
     if (fs.existsSync(path.resolve(currentDirectory, config.publicDir))) {
         plugins.push(
             copy({
+                watch: mode === 'development',
                 assets: [
                     {
                         from: path.resolve(

@@ -1,8 +1,8 @@
 export function useFlammeBuildMode() {
     return [
-        process.env.BUILD_MODE as 'development' | 'production',
+        globalThis.buildMode as 'development' | 'production',
         (mode: 'development' | 'production') => {
-            process.env.BUILD_MODE = mode
+            globalThis.buildMode = mode
         },
     ] as const
 }
