@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { FlammeAssets } from 'flamme/client'
+// @ts-ignore
 import { hello } from './styles.module.css'
 import './styles.css'
 import './estilo.scss'
@@ -8,10 +9,12 @@ import './style.styl'
 
 import json from './file.json'
 
+// @ts-ignore
 import pikachu from './assets/pikachu.png'
 
 export default function Index() {
     const [counter, setCounter] = useState(0)
+    console.log(import.meta.env)
     return (
         <html>
             <head>

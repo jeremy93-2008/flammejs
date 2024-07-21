@@ -30,6 +30,9 @@ export interface IFlammeConfigFile {
     // development server port
     devServerPort?: number
 
+    // env public prefix
+    envPublicPrefix?: string
+
     // css options
     css: {
         // css modules options
@@ -75,6 +78,8 @@ export async function useFlammeConfig() {
             cacheDir: '.flamme',
 
             devServerPort: 3000,
+
+            envPublicPrefix: 'PUBLIC_',
 
             css: {
                 cssModules: {

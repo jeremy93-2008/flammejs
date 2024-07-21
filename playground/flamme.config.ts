@@ -14,6 +14,8 @@ export default defineFlammeConfig({
 
     devServerPort: 3000,
 
+    envPublicPrefix: 'PUBLIC_',
+
     css: {
         tailwindcss: {
             configPath: 'tailwind.config.js',

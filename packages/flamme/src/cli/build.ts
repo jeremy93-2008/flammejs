@@ -12,6 +12,7 @@ import { stylusLoader } from 'esbuild-stylus-loader'
 import { tailwindPlugin } from 'esbuild-plugin-tailwindcss'
 import { copy } from 'esbuild-plugin-copy'
 import { IFlammeConfigFile, useFlammeConfig } from '../hooks/useFlammeConfig'
+import 'dotenv/config'
 
 export interface IBuildEndpointParams {
     entryPointClientContent: string
@@ -154,6 +155,29 @@ const getBuildLoader = (
     }
 }
 
+export async function getPublicEnv() {
+    const { config } = await useFlammeConfig()
+    return Object.keys(process.env).reduce(
+        (acc, key) => {
+            if (key.startsWith(config.envPublicPrefix)) {
+                ;(acc as any)[key] = `\"${process.env[key]}\"`
+            }
+            return acc
+        },
+        {} as Record<string, string>
+    )
+}
+
+export async function getEnv() {
+    return Object.keys(process.env).reduce(
+        (acc, key) => {
+            ;(acc as any)[key] = `\"${process.env[key]}\"`
+            return acc
+        },
+        {} as Record<string, string>
+    )
+}
+
 export async function buildClientEndpoint({
     mode,
     entryPointContent,
@@ -173,10 +197,15 @@ export async function buildClientEndpoint({
         },
         absWorkingDir: currentDirectory,
         bundle: true,
+        define: {
+            NODE_ENV: mode,
+            ...(await getPublicEnv()),
+        },
         outfile: buildPath,
         minify: mode === 'production',
         jsx: 'transform',
         platform: 'browser',
+        format: 'esm',
         allowOverwrite: true,
         publicPath: config.assetsBaseUrl,
         loader,
@@ -203,9 +232,14 @@ export async function buildServerEndpoint({
         },
         absWorkingDir: currentDirectory,
         bundle: true,
+        define: {
+            NODE_ENV: mode,
+            ...(await getEnv()),
+        },
         outfile: buildPath,
         minify: mode === 'production',
         platform: 'node',
+        format: 'cjs',
         allowOverwrite: true,
         publicPath: config.assetsBaseUrl,
         loader,

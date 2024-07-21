@@ -51,6 +51,7 @@ export async function createFlammeEntrypoints({
             import { createApp, createRouter, defineEventHandler, serveStatic, setResponseHeader } from 'h3'
             import * as fs from 'node:fs'
             import * as fsPromises from 'node:fs/promises'
+            import * as mime from 'mime-types'
             import path from 'node:path'
             import entrypointServer from "${entrypointServerPath}"
             import EntrypointClient from "${entrypointClientPath}"
@@ -80,10 +81,12 @@ export async function createFlammeEntrypoints({
                     return serveStatic(event, {
                         getContents: (id) => {
                             if(id === '/server.${hashKey}.js') return null
+                            setResponseHeader(event, 'content-type', mime.lookup(id))
                             return fsPromises.readFile(path.join('${outPath}', id))
                         },
                         getMeta: async (id) => {
                             if(id === '/server.${hashKey}.js') return null
+                            setResponseHeader(event, 'content-type', mime.lookup(id))
                             const stats = await fsPromises
                                 .stat(path.join('${outPath}', id))
                                 .catch(() => {})
@@ -107,7 +110,7 @@ export async function createFlammeEntrypoints({
                     React.createElement(EntrypointClient),
                     {
                         onShellReady() {
-                            event.headers.set('content-type', 'text/html')
+                            setResponseHeader(event, 'content-type', 'text/html')
                             pipe(event.node.res)
                         },
                         onShellError(error) {
