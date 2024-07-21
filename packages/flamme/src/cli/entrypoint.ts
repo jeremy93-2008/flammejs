@@ -1,6 +1,7 @@
-import { IFlammeConfigFile } from '../hooks/useFlammeConfig'
+import { IFlammeConfigFile, useFlammeConfig } from '../hooks/useFlammeConfig'
 import { useFlammeCurrentDirectory } from '../hooks/useFlammeCurrentDirectory'
 import path from 'node:path'
+import { getPublicEnv } from './env'
 interface ICreateFlammeEntrypoints {
     entrypointClientPath: string
     entrypointServerPath: string
@@ -14,16 +15,22 @@ export async function createFlammeEntrypoints({
     outPath,
     config,
 }: ICreateFlammeEntrypoints) {
-    const { currentDirectory } = await useFlammeCurrentDirectory()
     const defaultCssPath = path.resolve(
         __dirname,
         '../../src/core/styles/default.css'
     )
-    const getEntryPointClientContent = ({ hashKey }: { hashKey: string }) => {
+
+    const getEntryPointClientContent = async ({
+        hashKey,
+    }: {
+        hashKey: string
+    }) => {
         const assetsMap = JSON.stringify({
             'client.js': `/_flamme/assets/client.${hashKey}.js`,
             'client.css': `/_flamme/assets/client.${hashKey}.css`,
         })
+        const publicEnv = await getPublicEnv()
+        console.log(publicEnv)
         return `
             import React from 'react'
             import { hydrateRoot } from 'react-dom/client'
@@ -32,6 +39,8 @@ export async function createFlammeEntrypoints({
             
             function IndexApp() {
                 globalThis.assetsMap = ${assetsMap}
+                globalThis.process = {"env":  ${JSON.stringify(publicEnv)}}
+                
                 return React.createElement(EntrypointClient)
             }
             
@@ -39,7 +48,11 @@ export async function createFlammeEntrypoints({
         `
     }
 
-    const getEntryPointServerContent = ({ hashKey }: { hashKey: string }) => {
+    const getEntryPointServerContent = async ({
+        hashKey,
+    }: {
+        hashKey: string
+    }) => {
         const assetsMap = JSON.stringify({
             'client.js': `/_flamme/assets/client.${hashKey}.js`,
             'client.css': `/_flamme/assets/client.${hashKey}.css`,
@@ -71,12 +84,9 @@ export async function createFlammeEntrypoints({
                 event.context.router = router
             }))
             
-            // Register the server single entrypoint
-            app.use("${config.serverBaseUrl}",defineEventHandler(entrypointServer))
-            
             // Register the static assets created by the build
             app.use(
-                '/_flamme/assets',
+                "${config.assetsBaseUrl}",
                 defineEventHandler((event) => {
                     return serveStatic(event, {
                         getContents: (id) => {
@@ -103,9 +113,16 @@ export async function createFlammeEntrypoints({
                     })
                 })
             )
+            
+            // Register the server single entrypoint
+            app.use("${config.serverBaseUrl}",defineEventHandler((event) => {
+                process.env = ${JSON.stringify(globalThis.env)}
+                return entrypointServer(event)
+            }))
         
             //Register the client single entrypoint
             app.use("${config.root || '/'}", defineEventHandler((event) => {
+                process.env = ${JSON.stringify(globalThis.envPublic)}
                 const { pipe } = renderToPipeableStream(
                     React.createElement(EntrypointClient),
                     {

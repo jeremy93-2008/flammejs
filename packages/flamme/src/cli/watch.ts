@@ -12,8 +12,16 @@ interface IWatchAndListenFlammeParams {
     currentDirectory: string
     buildClientPath: (hash: string) => string
     buildServerPath: (hash: string) => string
-    getEntryPointClientContent: ({ hashKey }: { hashKey: string }) => string
-    getEntryPointServerContent: ({ hashKey }: { hashKey: string }) => string
+    getEntryPointClientContent: ({
+        hashKey,
+    }: {
+        hashKey: string
+    }) => Promise<string>
+    getEntryPointServerContent: ({
+        hashKey,
+    }: {
+        hashKey: string
+    }) => Promise<string>
     hashKey: string
     config: Required<IFlammeConfigFile>
     port: number
@@ -48,10 +56,10 @@ export async function watchAndListenFlamme(
 
         // browser client build + server - ssr build
         await buildEndpoint({
-            entryPointClientContent: getEntryPointClientContent({
+            entryPointClientContent: await getEntryPointClientContent({
                 hashKey: newHashKey,
             }),
-            entryPointServerContent: getEntryPointServerContent({
+            entryPointServerContent: await getEntryPointServerContent({
                 hashKey: newHashKey,
             }),
             buildClientPath: buildClientPath(newHashKey),

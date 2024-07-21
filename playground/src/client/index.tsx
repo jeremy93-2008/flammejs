@@ -14,7 +14,7 @@ import pikachu from './assets/pikachu.png'
 
 export default function Index() {
     const [counter, setCounter] = useState(0)
-    console.log(import.meta.env)
+    console.log('react', process.env)
     return (
         <html>
             <head>

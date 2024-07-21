@@ -12,7 +12,7 @@ import { stylusLoader } from 'esbuild-stylus-loader'
 import { tailwindPlugin } from 'esbuild-plugin-tailwindcss'
 import { copy } from 'esbuild-plugin-copy'
 import { IFlammeConfigFile, useFlammeConfig } from '../hooks/useFlammeConfig'
-import 'dotenv/config'
+import { getEnv, getPublicEnv } from './env'
 
 export interface IBuildEndpointParams {
     entryPointClientContent: string
@@ -155,29 +155,6 @@ const getBuildLoader = (
     }
 }
 
-export async function getPublicEnv() {
-    const { config } = await useFlammeConfig()
-    return Object.keys(process.env).reduce(
-        (acc, key) => {
-            if (key.startsWith(config.envPublicPrefix)) {
-                ;(acc as any)[key] = `\"${process.env[key]}\"`
-            }
-            return acc
-        },
-        {} as Record<string, string>
-    )
-}
-
-export async function getEnv() {
-    return Object.keys(process.env).reduce(
-        (acc, key) => {
-            ;(acc as any)[key] = `\"${process.env[key]}\"`
-            return acc
-        },
-        {} as Record<string, string>
-    )
-}
-
 export async function buildClientEndpoint({
     mode,
     entryPointContent,
@@ -207,7 +184,7 @@ export async function buildClientEndpoint({
         platform: 'browser',
         format: 'esm',
         allowOverwrite: true,
-        publicPath: config.assetsBaseUrl,
+        publicPath: config.assetsPublicUrl,
         loader,
         plugins,
     })
@@ -241,7 +218,7 @@ export async function buildServerEndpoint({
         platform: 'node',
         format: 'cjs',
         allowOverwrite: true,
-        publicPath: config.assetsBaseUrl,
+        publicPath: config.assetsPublicUrl,
         loader,
         plugins,
     })
