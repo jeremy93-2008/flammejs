@@ -2,7 +2,6 @@ import { useFlammeConfig } from '../hooks/useFlammeConfig'
 import 'dotenv/config'
 
 declare global {
-    var buildMode: 'development' | 'production'
     var env: Record<string, string>
     var envPublic: Record<string, string>
 }
