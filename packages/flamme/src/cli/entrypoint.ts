@@ -29,7 +29,7 @@ export async function createFlammeEntrypoints({
             'client.css': `/_flamme/assets/client.${hashKey}.css`,
         })
         const publicEnv = await getPublicEnv()
-        console.log(publicEnv)
+
         return `
             import React from 'react'
             import { hydrateRoot } from 'react-dom/client'

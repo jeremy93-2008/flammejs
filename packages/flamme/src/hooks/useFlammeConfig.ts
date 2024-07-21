@@ -53,6 +53,8 @@ export interface IFlammeConfigFile {
 
     // esbuild options
     esbuild?: {
+        // esbuild log level
+        loglevel?: 'info' | 'warning' | 'error' | 'silent' | 'debug' | 'verbose'
         // esbuild loaders
         loader?: Record<string, Loader>
         // esbuild plugins
@@ -103,6 +105,7 @@ export async function useFlammeConfig() {
             },
 
             esbuild: {
+                loglevel: 'warning',
                 plugins: [],
             },
         },

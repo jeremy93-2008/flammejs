@@ -24,6 +24,7 @@ export default defineFlammeConfig({
     },
 
     esbuild: {
+        loglevel: 'warning',
         plugins: [],
     },
 })
