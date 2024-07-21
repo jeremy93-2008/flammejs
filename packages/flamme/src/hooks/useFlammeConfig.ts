@@ -31,6 +31,8 @@ export interface IFlammeConfigFile {
 
     // development server port
     devServerPort?: number
+    // hmr server port
+    hmrServerPort?: number
 
     // env public prefix
     envPublicPrefix?: string
@@ -83,6 +85,7 @@ export async function useFlammeConfig() {
             cacheDir: '.flamme',
 
             devServerPort: 3000,
+            hmrServerPort: 3001,
 
             envPublicPrefix: 'PUBLIC_',
 

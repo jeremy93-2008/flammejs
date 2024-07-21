@@ -14,6 +14,7 @@ export default defineFlammeConfig({
     cacheDir: '.flamme',
 
     devServerPort: 3000,
+    hmrServerPort: 3001,
 
     envPublicPrefix: 'PUBLIC_',
 

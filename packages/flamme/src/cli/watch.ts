@@ -7,6 +7,7 @@ import path from 'node:path'
 import { type IFlammeConfigFile } from '../hooks/useFlammeConfig'
 import { buildEndpoint } from './build'
 import { listenServer } from './listen'
+import { serveHMR } from './hmr'
 
 interface IWatchAndListenFlammeParams {
     currentDirectory: string
@@ -77,6 +78,9 @@ export async function watchAndListenFlamme(
         buildServerPath: buildServerPath(hashKey),
         port,
     })
+
+    // hmr server
+    await serveHMR()
 
     console.log('👀 Watching', colors.green('/src'), 'for files changes...')
 }
