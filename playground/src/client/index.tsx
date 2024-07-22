@@ -27,7 +27,7 @@ export default function Index() {
             </head>
             <body>
                 <div className="app">
-                    <h1 className="text-3xl">Hello, Flamme!</h1>
+                    <h1 className="text-3xl">Hello, Flamme 90!</h1>
                     <p className={hello}>Counter: {counter}</p>
                     <button
                         className="bg-blue-300 px-3 py-1 rounded-md"

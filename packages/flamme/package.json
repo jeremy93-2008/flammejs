@@ -53,12 +53,14 @@
     "react-dom": "^18.3.1",
     "rimraf": "^6.0.1",
     "stylus": "^0.63.0",
-    "unstorage": "^1.10.2"
+    "unstorage": "^1.10.2",
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "@types/node": "^20.14.10",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
+    "@types/ws": "^8.5.11",
     "esbuild-plugin-tailwindcss": "^1.2.0",
     "tsup": "^8.1.0",
     "typescript": "^5.5.3"

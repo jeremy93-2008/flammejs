@@ -2,6 +2,7 @@ import { IFlammeConfigFile } from '../hooks/useFlammeConfig'
 import path from 'node:path'
 import { getPublicEnv } from './env'
 import { WS_RELOAD_MESSAGE } from './hmr'
+import { useFlammeBuildMode } from '../hooks/useFlammeBuildMode'
 interface ICreateFlammeEntrypoints {
     entrypointClientPath: string
     entrypointServerPath: string
@@ -15,6 +16,7 @@ export async function createFlammeEntrypoints({
     outPath,
     config,
 }: ICreateFlammeEntrypoints) {
+    const [mode] = useFlammeBuildMode()
     const defaultCssPath = path.resolve(
         __dirname,
         '../../src/core/styles/default.css'
@@ -45,15 +47,21 @@ export async function createFlammeEntrypoints({
             }
             
             hydrateRoot(document, React.createElement(IndexApp))
+            ${
+                mode === 'development'
+                    ? `
+                // Create WebSocket connection.
+                const socket = new WebSocket("ws://localhost:${config.hmrServerPort}/hmr");
+                
+                // Listen for messages
+                socket.addEventListener("message", (event) => {
+                    if(event.data === "${WS_RELOAD_MESSAGE}")
+                        location.reload()
+                });
+            `
+                    : ''
+            }
             
-            // Create WebSocket connection.
-            const socket = new WebSocket("ws://localhost:${config.hmrServerPort}/hmr");
-            
-            // Listen for messages
-            socket.addEventListener("message", (event) => {
-                if(event.data === ${WS_RELOAD_MESSAGE})
-                    location.reload()
-            });
         `
     }
 

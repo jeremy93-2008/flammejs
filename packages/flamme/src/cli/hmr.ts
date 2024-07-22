@@ -1,9 +1,9 @@
-import { createApp, defineWebSocketHandler, toNodeListener } from 'h3'
+import { WebSocketServer } from 'ws'
 import chokidar from 'chokidar'
 import { IFlammeConfigFile, useFlammeConfig } from '../hooks/useFlammeConfig'
 import path from 'node:path'
 import { useFlammeCurrentDirectory } from '../hooks/useFlammeCurrentDirectory'
-import { listen } from 'listhen'
+import colors from 'colors/safe'
 
 export const WS_RELOAD_MESSAGE = 'reload'
 
@@ -15,41 +15,32 @@ interface IServeHMROptions {
 export async function serveHMR() {
     const { currentDirectory } = await useFlammeCurrentDirectory()
     const { config } = await useFlammeConfig()
-    const app = appHMR({ currentDirectory, config })
-
-    await listen(toNodeListener(app), {
-        port: config.hmrServerPort,
-        showURL: false,
-        ws: true,
-    })
+    appHMR({ currentDirectory, config })
 }
 
 export function appHMR({ currentDirectory, config }: IServeHMROptions) {
-    const app = createApp()
-
-    app.use(
-        '/hmr',
-        defineWebSocketHandler({
-            open(peer) {
-                console.log('🔥[hmr] open', peer)
-                peer.send('connected')
-                chokidar
-                    .watch(path.resolve(currentDirectory, config.cacheDir))
-                    .on('change', (path, stats) => {
-                        console.log('🔥[hmr] change', path)
-                        peer.send(WS_RELOAD_MESSAGE)
-                    })
-            },
-
-            close(peer, event) {
-                console.log('[hmr] close', peer, event)
-            },
-
-            error(peer, error) {
-                console.log('[hmr] error', peer, error)
-            },
-        })
-    )
-
-    return app
+    let isFistConnection = true
+    return new WebSocketServer({
+        port: config.hmrServerPort,
+    }).on('connection', (ws) => {
+        if (isFistConnection)
+            console.log(
+                '🔥 Hot Reload Module started at',
+                colors.blue(`ws://localhost:${config.hmrServerPort}`)
+            )
+        isFistConnection = false
+        const watcher = chokidar
+            .watch(path.resolve(currentDirectory, config.cacheDir))
+            .on('change', async (path, stats) => {
+                await watcher.close()
+                setTimeout(() => {
+                    console.log(
+                        '🔥 Client reload at',
+                        colors.blue(`ws://localhost:${config.hmrServerPort}`)
+                    )
+                    ws.send(WS_RELOAD_MESSAGE)
+                    ws.close()
+                })
+            })
+    })
 }
