@@ -180,7 +180,6 @@ export async function buildClientEndpoint({
             ...(await getPublicEnv()),
         },
         outfile: buildPath,
-        sourceRoot: '../../',
         sourcemap: mode === 'development',
         minify: mode === 'production',
         jsx: 'transform',
@@ -189,7 +188,6 @@ export async function buildClientEndpoint({
         treeShaking: true,
         allowOverwrite: true,
         logLevel: config.esbuild.loglevel,
-        publicPath: config.assetsPublicUrl,
         loader,
         plugins,
     })
@@ -219,7 +217,6 @@ export async function buildServerEndpoint({
             ...(await getEnv()),
         },
         outfile: buildPath,
-        sourceRoot: '../../',
         sourcemap: mode === 'development',
         minify: mode === 'production',
         platform: 'node',
@@ -227,7 +224,6 @@ export async function buildServerEndpoint({
         treeShaking: true,
         allowOverwrite: true,
         logLevel: config.esbuild.loglevel,
-        publicPath: config.assetsPublicUrl,
         loader,
         plugins,
     })

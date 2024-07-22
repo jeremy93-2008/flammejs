@@ -26,8 +26,8 @@ export async function createFlammeEntrypoints({
         hashKey: string
     }) => {
         const assetsMap = JSON.stringify({
-            'client.js': `/_flamme/assets/client.${hashKey}.js`,
-            'client.css': `/_flamme/assets/client.${hashKey}.css`,
+            'client.js': `${config.base}client.${hashKey}.js`,
+            'client.css': `${config.base}client.${hashKey}.css`,
         })
         const publicEnv = await getPublicEnv()
 
@@ -63,8 +63,8 @@ export async function createFlammeEntrypoints({
         hashKey: string
     }) => {
         const assetsMap = JSON.stringify({
-            'client.js': `/_flamme/assets/client.${hashKey}.js`,
-            'client.css': `/_flamme/assets/client.${hashKey}.css`,
+            'client.js': `${config.base}client.${hashKey}.js`,
+            'client.css': `${config.base}client.${hashKey}.css`,
         })
         return `
             import React from 'react'
@@ -93,10 +93,23 @@ export async function createFlammeEntrypoints({
                 event.context.router = router
             }))
             
-            // Register the static assets created by the build
+            // Register specific case of favicon request to avoid loading the client
+            app.use('/favicon.ico', defineEventHandler((event) => {
+                if(!fs.existsSync(path.join('${outPath}', "favicon.ico"))) return null
+                return fsPromises.readFile(path.join('${outPath}', "favicon.ico"))
+            }))
+            
+            // Register the server single entrypoint
+            app.use("${config.serverBaseUrl}",defineEventHandler((event) => {
+                process.env = ${JSON.stringify(globalThis.env)}
+                return entrypointServer(event)
+            }))
+            
+             // Register the static assets created by the build
             app.use(
-                "${config.assetsBaseUrl}",
+                "${config.root || '/'}",
                 defineEventHandler((event) => {
+                    if(event.path === "${config.root || '/'}") return undefined
                     return serveStatic(event, {
                         getContents: (id) => {
                             if(id === '/server.${hashKey}.js') return null
@@ -122,18 +135,6 @@ export async function createFlammeEntrypoints({
                     })
                 })
             )
-            
-            // Register specific case of favicon request to avoid loading the client
-            app.use('/favicon.ico', defineEventHandler((event) => {
-                if(!fs.existsSync(path.join('${outPath}', "favicon.ico"))) return null
-                return fsPromises.readFile(path.join('${outPath}', "favicon.ico"))
-            }))
-            
-            // Register the server single entrypoint
-            app.use("${config.serverBaseUrl}",defineEventHandler((event) => {
-                process.env = ${JSON.stringify(globalThis.env)}
-                return entrypointServer(event)
-            }))
         
             //Register the client single entrypoint
             app.use("${config.root || '/'}", defineEventHandler((event) => {

@@ -45,7 +45,7 @@ export default function Index() {
                     </p>
                     <p>{JSON.stringify(json, undefined, 4)}</p>
                     <img src={pikachu} alt="pikachu" />
-                    <img src="./_flamme/assets/marek.jpg" alt="marek" />
+                    <img src="./marek.jpg" alt="marek" />
                 </div>
             </body>
         </html>

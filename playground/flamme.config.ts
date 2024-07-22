@@ -4,8 +4,6 @@ export default defineFlammeConfig({
     root: '/',
     base: './',
     serverBaseUrl: '/api',
-    assetsBaseUrl: '/_flamme/assets',
-    assetsPublicUrl: './_flamme/assets',
 
     clientDir: 'src/client',
     serverDir: 'src/server',

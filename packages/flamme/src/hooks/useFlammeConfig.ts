@@ -13,10 +13,6 @@ export interface IFlammeConfigFile {
     base?: string
     // server base url
     serverBaseUrl?: string
-    // assets base url
-    assetsBaseUrl?: string
-    // assets public url
-    assetsPublicUrl?: string
 
     // client directory
     clientDir?: string
@@ -75,8 +71,6 @@ export async function useFlammeConfig() {
             root: '/',
             base: './',
             serverBaseUrl: '/api',
-            assetsBaseUrl: '/_flamme/assets',
-            assetsPublicUrl: './_flamme/assets',
 
             clientDir: 'src/client',
             serverDir: 'src/server',
