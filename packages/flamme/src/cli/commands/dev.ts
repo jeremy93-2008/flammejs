@@ -3,6 +3,7 @@ import { createFlamme } from '../flamme'
 import { watchAndListenFlamme } from '../watch'
 import { buildEndpoint } from '../build'
 import { useFlammeBuildMode } from '../../hooks/useFlammeBuildMode'
+import { serveAndListenHMRFlamme } from '../hmr'
 
 export default defineCommand({
     meta: {
@@ -44,6 +45,9 @@ export default defineCommand({
             buildClientPath: buildClientPath(hashKey),
             buildServerPath: buildServerPath(hashKey),
         })
+
+        // hmr server
+        await serveAndListenHMRFlamme()
 
         // watch and listen flamme
         await watchAndListenFlamme({

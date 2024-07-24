@@ -7,7 +7,7 @@ import path from 'node:path'
 import { type IFlammeConfigFile } from '../hooks/useFlammeConfig'
 import { buildEndpoint } from './build'
 import { listenServer } from './listen'
-import { serveHMR } from './hmr'
+import { formatShortDate } from '../utils/formatShortDate'
 
 interface IWatchAndListenFlammeParams {
     currentDirectory: string
@@ -47,6 +47,8 @@ export async function watchAndListenFlamme(
         if (pathname.includes(config.buildDir)) return
         if (!pathname.includes('/src')) return
         console.log(
+            formatShortDate(new Date()),
+            colors.red('[flamme]'),
             '📄 File changed:',
             colors.green(path.relative(process.cwd(), pathname))
         )
@@ -79,8 +81,11 @@ export async function watchAndListenFlamme(
         port,
     })
 
-    // hmr server
-    await serveHMR()
-
-    console.log('👀 Watching', colors.green('/src'), 'for files changes...')
+    console.log(
+        formatShortDate(new Date()),
+        colors.red('[flamme]'),
+        '👀 Watching',
+        colors.green('/src'),
+        'for files changes...'
+    )
 }

@@ -1,6 +1,7 @@
 import { listen } from 'listhen'
 import { toNodeListener } from 'h3'
 import colors from 'colors/safe'
+import { formatShortDate } from '../utils/formatShortDate'
 
 export async function listenServer({
     buildServerPath,
@@ -20,7 +21,11 @@ export async function listenServer({
         showURL: !reload,
     })
 
-    if (reload) console.log(`🔄 Server reload at`, colors.blue(listener.url))
+    if (reload)
+        console.log(
+            `${formatShortDate(new Date())} ${colors.red('[flamme]')} 🔄 Server rebuild at`,
+            colors.blue(listener.url)
+        )
 
     return listener
 }

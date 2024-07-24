@@ -55,8 +55,10 @@ export async function createFlammeEntrypoints({
                 
                 // Listen for messages
                 socket.addEventListener("message", (event) => {
-                    if(event.data === "${WS_RELOAD_MESSAGE}")
+                    if(event.data === "${WS_RELOAD_MESSAGE}") {
+                        socket.close()
                         location.reload()
+                    }
                 });
             `
                     : ''
