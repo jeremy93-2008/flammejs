@@ -59,7 +59,7 @@ export function listenHMRFlamme({
             console.log(
                 formatShortDate(new Date()),
                 colors.red('[flamme]'),
-                '🔥 Client reload send at',
+                '🔥 Client reload send from',
                 colors.blue(`ws://localhost:${config.hmrServerPort}`)
             )
             ws.send(WS_RELOAD_MESSAGE)

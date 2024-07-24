@@ -46,9 +46,6 @@ export default defineCommand({
             buildServerPath: buildServerPath(hashKey),
         })
 
-        // hmr server
-        await serveAndListenHMRFlamme()
-
         // watch and listen flamme
         await watchAndListenFlamme({
             currentDirectory,
@@ -60,5 +57,8 @@ export default defineCommand({
             config,
             port: args.port ? Number(args.port) : config.devServerPort,
         })
+
+        // hmr server
+        await serveAndListenHMRFlamme()
     },
 })

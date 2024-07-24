@@ -45,13 +45,24 @@ export async function watchAndListenFlamme(
 
     chokidar.watch(currentDirectory).on('change', async (pathname, stats) => {
         if (pathname.includes(config.buildDir)) return
-        if (!pathname.includes('/src')) return
-        console.log(
-            formatShortDate(new Date()),
-            colors.red('[flamme]'),
-            '📄 File changed:',
-            colors.green(path.relative(process.cwd(), pathname))
-        )
+        if (!pathname.includes('/src') && !pathname.includes('flamme.config'))
+            return
+
+        if (!pathname.includes('flamme.config'))
+            console.log(
+                formatShortDate(new Date()),
+                colors.red('[flamme]'),
+                '📄 File changed:',
+                colors.green(path.relative(process.cwd(), pathname))
+            )
+        else
+            console.log(
+                formatShortDate(new Date()),
+                colors.red('[flamme]'),
+                '⚙️ Configuration changed:',
+                colors.green(path.relative(process.cwd(), pathname))
+            )
+
         const newHashKey = hash(performance.now())
 
         await listener.close()
