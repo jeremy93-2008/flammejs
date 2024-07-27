@@ -57,8 +57,5 @@ export default defineCommand({
             config,
             port: args.port ? Number(args.port) : config.devServerPort,
         })
-
-        // hmr server
-        await serveAndListenHMRFlamme()
     },
 })

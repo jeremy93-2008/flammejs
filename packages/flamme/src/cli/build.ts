@@ -13,6 +13,7 @@ import { tailwindPlugin } from 'esbuild-plugin-tailwindcss'
 import { copy } from 'esbuild-plugin-copy'
 import { IFlammeConfigFile, useFlammeConfig } from '../hooks/useFlammeConfig'
 import { getEnv, getPublicEnv } from './env'
+import { useFlammeCacheDirEntries } from '../hooks/useFlammeCacheDirEntries'
 
 export interface IBuildEndpointParams {
     entryPointClientContent: string
@@ -70,9 +71,12 @@ export async function buildEndpoint({
 
 export async function cleanBuildEndpoint() {
     const { currentDirectory } = await useFlammeCurrentDirectory()
-    const { config } = await useFlammeConfig()
+    const [cacheDirEntries] = useFlammeCacheDirEntries()
 
-    await rimraf.rimraf(path.resolve(currentDirectory, config.cacheDir))
+    // clean all cache directories
+    for (const cacheDir of cacheDirEntries) {
+        await rimraf.rimraf(path.resolve(currentDirectory, cacheDir))
+    }
 }
 
 function getBuildPlugins(

@@ -5,6 +5,7 @@ import CSSModules from 'esbuild-css-modules-plugin'
 import { type SassPluginOptions } from 'esbuild-sass-plugin'
 // @ts-ignore
 import { stylusLoader } from 'esbuild-stylus-loader'
+import { useFlammeCacheDirEntries } from './useFlammeCacheDirEntries'
 
 export interface IFlammeConfigFile {
     // base url
@@ -63,7 +64,7 @@ export interface IFlammeConfigFile {
 export async function useFlammeConfig() {
     const { currentDirectory } = await useFlammeCurrentDirectory()
 
-    return await loadConfig<Required<IFlammeConfigFile>>({
+    const c12 = await loadConfig<Required<IFlammeConfigFile>>({
         cwd: currentDirectory,
         name: 'flamme',
         dotenv: true,
@@ -107,4 +108,10 @@ export async function useFlammeConfig() {
             },
         },
     })
+
+    // Add cache dir entry
+    const [_cacheDirEntries, addCacheDirEntry] = useFlammeCacheDirEntries()
+    addCacheDirEntry(c12.config.cacheDir)
+
+    return c12
 }

@@ -4,10 +4,17 @@ import { hash } from 'ohash'
 import { rimraf } from 'rimraf'
 import colors from 'colors/safe'
 import path from 'node:path'
-import { type IFlammeConfigFile } from '../hooks/useFlammeConfig'
+import {
+    type IFlammeConfigFile,
+    useFlammeConfig,
+} from '../hooks/useFlammeConfig'
 import { buildEndpoint } from './build'
 import { listenServer } from './listen'
 import { formatShortDate } from '../utils/formatShortDate'
+import { serveAndListenHMRFlamme } from './hmr'
+import { useFlammeCurrentDirectory } from '../hooks/useFlammeCurrentDirectory'
+import { createFlamme } from './flamme'
+import * as fs from 'node:fs'
 
 interface IWatchAndListenFlammeParams {
     currentDirectory: string
@@ -31,61 +38,68 @@ interface IWatchAndListenFlammeParams {
 export async function watchAndListenFlamme(
     params: IWatchAndListenFlammeParams
 ) {
-    const {
-        currentDirectory,
-        buildClientPath,
-        buildServerPath,
-        getEntryPointClientContent,
-        getEntryPointServerContent,
-        hashKey,
-        config,
-        port,
-    } = params
+    const { currentDirectory, buildServerPath, hashKey, config, port } = params
     let listener: Listener
 
-    chokidar.watch(currentDirectory).on('change', async (pathname, stats) => {
-        if (pathname.includes(config.buildDir)) return
-        if (!pathname.includes('/src') && !pathname.includes('flamme.config'))
-            return
+    // hmr server
+    const hmr = await serveAndListenHMRFlamme()
 
-        if (!pathname.includes('flamme.config'))
-            console.log(
-                formatShortDate(new Date()),
-                colors.red('[flamme]'),
-                '📄 File changed:',
-                colors.green(path.relative(process.cwd(), pathname))
+    const watcher = chokidar
+        .watch(currentDirectory)
+        .on('change', async (pathname, stats) => {
+            if (pathname.includes(config.buildDir)) return
+            if (
+                !pathname.includes('/src') &&
+                !pathname.includes('flamme.config')
             )
-        else
-            console.log(
-                formatShortDate(new Date()),
-                colors.red('[flamme]'),
-                '⚙️ Configuration changed:',
-                colors.green(path.relative(process.cwd(), pathname))
-            )
+                return
 
-        const newHashKey = hash(performance.now())
-
-        await listener.close()
-        await rimraf.rimraf(path.resolve(currentDirectory, config.cacheDir))
-
-        // browser client build + server - ssr build
-        await buildEndpoint({
-            entryPointClientContent: await getEntryPointClientContent({
+            const {
                 hashKey: newHashKey,
-            }),
-            entryPointServerContent: await getEntryPointServerContent({
-                hashKey: newHashKey,
-            }),
-            buildClientPath: buildClientPath(newHashKey),
-            buildServerPath: buildServerPath(newHashKey),
-        })
+                buildClientPath: nextBuildClientPath,
+                buildServerPath: nextBuildServerPath,
+                getEntryPointClientContent: nextGetEntryPointClientContent,
+                getEntryPointServerContent: nextGetEntryPointServerContent,
+            } = await createFlamme()
+            const { config: nextConfig } = await useFlammeConfig()
 
-        listener = await listenServer({
-            buildServerPath: buildServerPath(newHashKey),
-            port,
-            reload: true,
+            if (!pathname.includes('flamme.config')) {
+                console.log(
+                    formatShortDate(new Date()),
+                    colors.red('[flamme]'),
+                    '📄 File changed:',
+                    colors.green(path.relative(process.cwd(), pathname))
+                )
+            } else {
+                console.log(
+                    formatShortDate(new Date()),
+                    colors.red('[flamme]'),
+                    '⚙️ Configuration changed:',
+                    colors.green(path.relative(process.cwd(), pathname))
+                )
+                hmr.options.port = nextConfig.hmrServerPort
+            }
+
+            await listener.close()
+
+            // browser client build + server - ssr build
+            await buildEndpoint({
+                entryPointClientContent: await nextGetEntryPointClientContent({
+                    hashKey: newHashKey,
+                }),
+                entryPointServerContent: await nextGetEntryPointServerContent({
+                    hashKey: newHashKey,
+                }),
+                buildClientPath: nextBuildClientPath(newHashKey),
+                buildServerPath: nextBuildServerPath(newHashKey),
+            })
+
+            listener = await listenServer({
+                buildServerPath: nextBuildServerPath(newHashKey),
+                port: nextConfig.devServerPort ?? port,
+                reload: true,
+            })
         })
-    })
 
     listener = await listenServer({
         buildServerPath: buildServerPath(hashKey),

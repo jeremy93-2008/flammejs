@@ -1,7 +1,6 @@
 import { WebSocketServer } from 'ws'
 import chokidar from 'chokidar'
 import { IFlammeConfigFile, useFlammeConfig } from '../hooks/useFlammeConfig'
-import fs from 'node:fs'
 import path from 'node:path'
 import { useFlammeCurrentDirectory } from '../hooks/useFlammeCurrentDirectory'
 import colors from 'colors/safe'
@@ -17,7 +16,7 @@ interface IServeHMROptions {
 export async function serveAndListenHMRFlamme() {
     const { currentDirectory } = await useFlammeCurrentDirectory()
     const { config } = await useFlammeConfig()
-    listenHMRFlamme({ currentDirectory, config })
+    return listenHMRFlamme({ currentDirectory, config })
 }
 
 export function listenHMRFlamme({
@@ -28,7 +27,7 @@ export function listenHMRFlamme({
 
     const listeners = new Map<string, () => void>()
 
-    const watcher = chokidar
+    chokidar
         .watch(path.resolve(currentDirectory, config.cacheDir), {
             awaitWriteFinish: {
                 stabilityThreshold: 300,
