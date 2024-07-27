@@ -25,7 +25,7 @@ export function listenHMRFlamme({
 }: IServeHMROptions) {
     let isFistConnection = true
 
-    const listeners = new Map<string, () => void>()
+    let listener = () => {}
 
     chokidar
         .watch(path.resolve(currentDirectory, config.cacheDir), {
@@ -34,8 +34,10 @@ export function listenHMRFlamme({
                 pollInterval: 50,
             },
         })
-        .on('add', async () => {
-            listeners.forEach((listener) => listener())
+        .on('add', async (path) => {
+            if (path.match(/client\..+\.js$/gi)) {
+                return listener()
+            }
         })
 
     return new WebSocketServer({
@@ -52,7 +54,7 @@ export function listenHMRFlamme({
 
         isFistConnection = false
 
-        listeners.set(ws.url, () => {
+        listener = () => {
             if (isMessageAlreadySent) return
             isMessageAlreadySent = true
             console.log(
@@ -63,7 +65,6 @@ export function listenHMRFlamme({
             )
             ws.send(WS_RELOAD_MESSAGE)
             ws.terminate()
-            listeners.delete(ws.url)
-        })
+        }
     })
 }
