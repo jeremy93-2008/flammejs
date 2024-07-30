@@ -14,6 +14,7 @@ import { copy } from 'esbuild-plugin-copy'
 import { IFlammeConfigFile, useFlammeConfig } from '../hooks/useFlammeConfig'
 import { getEnv, getPublicEnv } from './env'
 import { useFlammeCacheDirEntries } from '../hooks/useFlammeCacheDirEntries'
+import { useFlammeBuildLoader } from '../hooks/useFlammeBuildLoader'
 
 export interface IBuildEndpointParams {
     hashKey: string
@@ -131,10 +132,13 @@ function getBuildPlugins(
         )
     }
 
+    const [buildLoader] = useFlammeBuildLoader()
+
     // Tailwindcss configuration path
     const tailwindcssConfigPath = path.resolve(
         currentDirectory,
-        config.css.tailwindcss?.configPath ?? 'tailwind.config.js'
+        config.css.tailwindcss?.configPath ??
+            (buildLoader === 'ts' ? 'tailwind.config.ts' : 'tailwind.config.js')
     )
 
     // Add tailwindcss plugin if enabled and configuration file exists

@@ -4,12 +4,23 @@ import { useFlammeConfig } from '../hooks/useFlammeConfig'
 import { useFlammeCurrentDirectory } from '../hooks/useFlammeCurrentDirectory'
 import { createFlammeEntrypoints } from './entrypoint'
 import { useFlammeBuildMode } from '../hooks/useFlammeBuildMode'
+import { useFlammeBuildLoader } from '../hooks/useFlammeBuildLoader'
+import * as fs from 'node:fs'
 
 export async function createFlamme() {
     const [mode] = useFlammeBuildMode()
     const { config } = await useFlammeConfig()
     const { currentDirectory } = await useFlammeCurrentDirectory()
 
+    const [_, setBuildLoader] = useFlammeBuildLoader()
+    const isTsConfigExists = fs.existsSync(
+        path.resolve(currentDirectory, 'tsconfig.json')
+    )
+
+    setBuildLoader('js')
+    if (isTsConfigExists) {
+        setBuildLoader('ts')
+    }
     const entrypointServerPath = path.resolve(
         currentDirectory,
         config.serverDir,

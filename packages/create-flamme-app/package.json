@@ -2,11 +2,18 @@
   "name": "create-flamme-app",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "bin": {
+    "create-flamme-app": "./dist/index.js",
+    "create-flamme": "./dist/index.js",
+    "cfa": "./dist/index.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "engines": {
+    "node": "^18.0.0 || >=20.0.0"
+  },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "MIT"
 }

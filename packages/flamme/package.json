@@ -11,6 +11,9 @@
     "build": "tsup-node src/core/index.ts src/core/index.client.ts src/core/index.server.ts src/cli/index.ts --dts --format esm,cjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "engines": {
+    "node": "^18.0.0 || >=20.0.0"
+  },
   "exports": {
     ".": {
       "import": "./dist/core/index.mjs",
@@ -30,7 +33,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "@types/mime-types": "^2.1.4",
     "c12": "^1.11.1",

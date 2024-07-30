@@ -18,7 +18,7 @@ export default defineFlammeConfig({
 
     css: {
         tailwindcss: {
-            configPath: 'tailwind.config.js',
+            configPath: 'tailwind.config.ts',
         },
     },
 

@@ -6,12 +6,16 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "engines": {
+    "node": "^18.0.0 || >=20.0.0"
+  },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "workspaces": [
     "packages/**/*",
-    "playground"
+    "playground/ts",
+    "playground/js"
   ],
   "devDependencies": {
     "prettier": "^3.3.2"
