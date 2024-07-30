@@ -44,62 +44,58 @@ export async function watchAndListenFlamme(
     // hmr server
     const hmr = await serveAndListenHMRFlamme()
 
-    const watcher = chokidar
-        .watch(currentDirectory)
-        .on('change', async (pathname, stats) => {
-            if (pathname.includes(config.buildDir)) return
-            if (
-                !pathname.includes('/src') &&
-                !pathname.includes('flamme.config')
+    chokidar.watch(currentDirectory).on('change', async (pathname, stats) => {
+        if (pathname.includes(config.buildDir)) return
+        if (!pathname.includes('/src') && !pathname.includes('flamme.config'))
+            return
+
+        const {
+            hashKey: newHashKey,
+            buildClientPath: nextBuildClientPath,
+            buildServerPath: nextBuildServerPath,
+            getEntryPointClientContent: nextGetEntryPointClientContent,
+            getEntryPointServerContent: nextGetEntryPointServerContent,
+        } = await createFlamme()
+        const { config: nextConfig } = await useFlammeConfig()
+
+        if (!pathname.includes('flamme.config')) {
+            console.log(
+                formatShortDate(new Date()),
+                colors.red('[flamme]'),
+                '📄 File changed:',
+                colors.green(path.relative(process.cwd(), pathname))
             )
-                return
+        } else {
+            console.log(
+                formatShortDate(new Date()),
+                colors.red('[flamme]'),
+                '⚙️ Configuration changed:',
+                colors.green(path.relative(process.cwd(), pathname))
+            )
+            hmr.options.port = nextConfig.hmrServerPort
+        }
 
-            const {
+        await listener.close()
+
+        // browser client build + server - ssr build
+        await buildEndpoint({
+            hashKey: newHashKey,
+            entryPointClientContent: await nextGetEntryPointClientContent({
                 hashKey: newHashKey,
-                buildClientPath: nextBuildClientPath,
-                buildServerPath: nextBuildServerPath,
-                getEntryPointClientContent: nextGetEntryPointClientContent,
-                getEntryPointServerContent: nextGetEntryPointServerContent,
-            } = await createFlamme()
-            const { config: nextConfig } = await useFlammeConfig()
-
-            if (!pathname.includes('flamme.config')) {
-                console.log(
-                    formatShortDate(new Date()),
-                    colors.red('[flamme]'),
-                    '📄 File changed:',
-                    colors.green(path.relative(process.cwd(), pathname))
-                )
-            } else {
-                console.log(
-                    formatShortDate(new Date()),
-                    colors.red('[flamme]'),
-                    '⚙️ Configuration changed:',
-                    colors.green(path.relative(process.cwd(), pathname))
-                )
-                hmr.options.port = nextConfig.hmrServerPort
-            }
-
-            await listener.close()
-
-            // browser client build + server - ssr build
-            await buildEndpoint({
-                entryPointClientContent: await nextGetEntryPointClientContent({
-                    hashKey: newHashKey,
-                }),
-                entryPointServerContent: await nextGetEntryPointServerContent({
-                    hashKey: newHashKey,
-                }),
-                buildClientPath: nextBuildClientPath(newHashKey),
-                buildServerPath: nextBuildServerPath(newHashKey),
-            })
-
-            listener = await listenServer({
-                buildServerPath: nextBuildServerPath(newHashKey),
-                port: nextConfig.devServerPort ?? port,
-                reload: true,
-            })
+            }),
+            entryPointServerContent: await nextGetEntryPointServerContent({
+                hashKey: newHashKey,
+            }),
+            buildClientPath: nextBuildClientPath(newHashKey),
+            buildServerPath: nextBuildServerPath(newHashKey),
         })
+
+        listener = await listenServer({
+            buildServerPath: nextBuildServerPath(newHashKey),
+            port: nextConfig.devServerPort ?? port,
+            reload: true,
+        })
+    })
 
     listener = await listenServer({
         buildServerPath: buildServerPath(hashKey),

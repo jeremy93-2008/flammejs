@@ -5,8 +5,10 @@
   "main": "index.js",
   "scripts": {
     "dev": "node ../packages/flamme/dist/cli/index.js dev",
-    "debug": "node inspect ../packages/flamme/dist/cli/index.js dev",
+    "dev:debug": "node inspect ../packages/flamme/dist/cli/index.js dev",
     "build": "node ../packages/flamme/dist/cli/index.js build",
+    "start": "node ../packages/flamme/dist/cli/index.js start",
+    "start:debug": "node inspect ../packages/flamme/dist/cli/index.js start",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

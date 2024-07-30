@@ -16,6 +16,7 @@ import { getEnv, getPublicEnv } from './env'
 import { useFlammeCacheDirEntries } from '../hooks/useFlammeCacheDirEntries'
 
 export interface IBuildEndpointParams {
+    hashKey: string
     entryPointClientContent: string
     entryPointServerContent: string
     buildClientPath: string
@@ -30,8 +31,14 @@ export interface ISingleBuildEndpointParams {
     loader: Record<string, Loader>
 }
 
+export interface IManifestEndpointParams {
+    mode: 'production' | 'development'
+    hashKey: string
+}
+
 // browser client build + server - ssr build
 export async function buildEndpoint({
+    hashKey,
     entryPointClientContent,
     entryPointServerContent,
     buildClientPath,
@@ -66,6 +73,12 @@ export async function buildEndpoint({
         buildPath: buildServerPath,
         loader,
         plugins,
+    })
+
+    // build manifest
+    await buildManifestEndpoint({
+        mode: mode ?? 'development',
+        hashKey,
     })
 }
 
@@ -231,4 +244,20 @@ export async function buildServerEndpoint({
         loader,
         plugins,
     })
+}
+
+export async function buildManifestEndpoint({
+    mode,
+    hashKey,
+}: IManifestEndpointParams) {
+    const { currentDirectory } = await useFlammeCurrentDirectory()
+    const { config } = await useFlammeConfig()
+    fs.writeFileSync(
+        path.resolve(
+            currentDirectory,
+            mode === 'development' ? config.cacheDir : config.buildDir,
+            '_buildManifest.js'
+        ),
+        'module.exports = ' + JSON.stringify({ hashKey })
+    )
 }
