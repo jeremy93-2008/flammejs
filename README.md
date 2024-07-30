@@ -4,7 +4,6 @@
 
 # Flamme 🔥
 
----
 Flamme is a metaframework that leverages the power of the `h3` HTTP server and React for both server-side rendering (SSR) and client-side rendering. This framework aims to provide a seamless development experience for building modern web applications.
 
 ## Features
