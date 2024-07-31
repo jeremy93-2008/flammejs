@@ -29,6 +29,9 @@
       "import": "./dist/core/index.client.mjs",
       "require": "./dist/core/index.client.js",
       "types": "./dist/core/index.client.d.ts"
+    },
+    "./client-types": {
+      "types": "./src/core/client.d.ts"
     }
   },
   "keywords": [],
