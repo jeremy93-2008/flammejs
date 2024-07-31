@@ -28,12 +28,12 @@ export default function Index() {
                     </h1>
                     <p className={styles.flammeText}>
                         This is a template for creating a new Flamme app with
-                        TypeScript.
+                        JavaScript.
                     </p>
                     <p className={styles.flammeText2}>
                         To get started, edit{' '}
                         <code className={styles.flammeCode}>
-                            src/client/index.tsx
+                            src/client/index.jsx
                         </code>{' '}
                         and save to reload.
                     </p>

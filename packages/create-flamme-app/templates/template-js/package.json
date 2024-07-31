@@ -1,7 +1,7 @@
 {
-  "name": "flamme-template-ts",
+  "name": "flamme-template-js",
   "version": "0.0.1-alpha.1",
-  "description": "A template for creating a new Flamme project using TypeScript.",
+  "description": "A template for creating a new Flamme project using JavaScript.",
   "main": "index.js",
   "scripts": {
     "dev": "flamme dev",
@@ -20,7 +20,6 @@
   },
   "devDependencies": {
     "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0",
-    "typescript": "^5.5.4"
+    "@types/react-dom": "^18.3.0"
   }
 }
