@@ -19,5 +19,8 @@
   ],
   "devDependencies": {
     "prettier": "^3.3.2"
+  },
+  "dependencies": {
+    "flamme": "^0.0.1"
   }
 }
