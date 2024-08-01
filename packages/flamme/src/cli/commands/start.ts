@@ -9,7 +9,7 @@ export default defineCommand({
     meta: {
         name: 'start',
         description: 'Start the Flamme server',
-        version: '0.0.1-alpha.3',
+        version: '0.0.1-alpha.4',
     },
     args: {
         port: {

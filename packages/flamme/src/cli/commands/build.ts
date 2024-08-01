@@ -11,7 +11,7 @@ export default defineCommand({
     meta: {
         name: 'build',
         description: 'Build the app',
-        version: '0.0.1-alpha.3',
+        version: '0.0.1-alpha.4',
     },
     run: async () => {
         let buildTime = performance.now()
