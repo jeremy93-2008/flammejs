@@ -2,15 +2,14 @@ import { defineCommand } from 'citty'
 import { useFlammeBuildMode } from '../../hooks/useFlammeBuildMode'
 import { listenServer } from '../listen'
 import { useFlammeCurrentDirectory } from '../../hooks/useFlammeCurrentDirectory'
-import path from 'node:path'
 import { useFlammeConfig } from '../../hooks/useFlammeConfig'
-import * as fs from 'node:fs'
+import path from 'node:path'
 
 export default defineCommand({
     meta: {
         name: 'start',
         description: 'Start the Flamme server',
-        version: '0.0.1',
+        version: '0.0.1-alpha.2',
     },
     args: {
         port: {

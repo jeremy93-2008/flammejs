@@ -3,13 +3,12 @@ import { createFlamme } from '../flamme'
 import { watchAndListenFlamme } from '../watch'
 import { buildEndpoint } from '../build'
 import { useFlammeBuildMode } from '../../hooks/useFlammeBuildMode'
-import { serveAndListenHMRFlamme } from '../hmr'
 
 export default defineCommand({
     meta: {
         name: 'dev',
         description: 'Start the development server',
-        version: '0.0.1',
+        version: '0.0.1-alpha.2',
     },
     args: {
         port: {

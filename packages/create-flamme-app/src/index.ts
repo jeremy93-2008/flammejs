@@ -4,13 +4,12 @@ import * as fsExtra from 'fs-extra'
 import * as path from 'node:path'
 import * as child from 'node:child_process'
 import { defineCommand, runMain, showUsage } from 'citty'
-import rimraf from 'rimraf'
 import colors from 'colors'
 
 const main = defineCommand({
     meta: {
         name: 'create-flamme-app',
-        version: '0.0.1-alpha.1',
+        version: '0.0.1-alpha.2',
         description: 'Create Flamme App',
     },
     args: {
@@ -24,9 +23,14 @@ const main = defineCommand({
             description: 'Template type. Default: ts. Options: ts, js',
             default: 'ts',
         },
+        overwrite: {
+            type: 'boolean',
+            description: 'Overwrite existing directory',
+            default: false,
+        },
     },
     run: async ({ args }) => {
-        const { projectName, template = 'ts' } = args
+        const { projectName, template = 'ts', overwrite } = args
 
         // Validate project name, based on npm package name rules
         const regex = new RegExp(
@@ -55,13 +59,20 @@ const main = defineCommand({
         if (fs.existsSync(path.join(currentDirectory, projectName))) {
             if (
                 fs.readdirSync(path.join(currentDirectory, projectName))
-                    .length > 0
+                    .length > 0 &&
+                !overwrite
             ) {
                 console.error(
                     colors.red(`[create-flamme-app] Directory is not empty`)
                 )
                 process.exit(1)
             }
+            console.log(
+                colors.yellow(
+                    `⚠️ Overwriting existing directory. ${colors.red(projectName)}`
+                )
+            )
+            fsExtra.removeSync(path.join(currentDirectory, projectName))
         }
 
         console.log(`🔥 Creating Flamme App: ${colors.green(projectName)}`)
@@ -108,7 +119,7 @@ const main = defineCommand({
             colors.white('Run the following commands to start the app:')
         )
         console.log(`cd ${colors.green(projectName)}`)
-        console.log('npm run dev')
+        console.log('> npm run dev')
         console.log(colors.rainbow('Happy coding!'))
     },
 })
