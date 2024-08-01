@@ -10,6 +10,7 @@
   },
   "scripts": {
     "build": "tsup-node src/core/index.ts src/core/index.client.ts src/core/index.server.ts src/cli/index.ts --dts --format esm,cjs",
+    "prepack": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "files": [
