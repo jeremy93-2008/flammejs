@@ -1,6 +1,6 @@
 {
   "name": "create-flamme-app",
-  "version": "0.0.1-alpha.2",
+  "version": "0.0.1-alpha.3",
   "description": "A CLI tool to bootstrap a new Flamme project, leveraging the h3 HTTP server and React for both server-side and client-side rendering.",
   "bin": {
     "create-flamme-app": "./dist/index.js",
@@ -15,6 +15,11 @@
     "dist",
     "templates"
   ],
+  "homepage": "https://github.com/jeremy93-2008/flammejs#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jeremy93-2008/flammejs.git"
+  },
   "engines": {
     "node": "^18.0.0 || >=20.0.0"
   },
