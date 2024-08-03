@@ -1,8 +1,8 @@
 import { type ArgDef } from 'citty'
 import { IFlammeConfigFile } from '../../hooks/useFlammeConfig'
-export type ArgsKey = keyof IFlammeConfigFile
 
-export const args: Record<ArgsKey | 'config' | string, ArgDef> = {
+export type ArgsKey = keyof IFlammeConfigFile | 'configFile'
+export const args: Record<ArgsKey | string, ArgDef> = {
     root: {
         type: 'string',
         description: 'Base url',
@@ -58,7 +58,7 @@ export const args: Record<ArgsKey | 'config' | string, ArgDef> = {
         description: 'Env public prefix',
         valueHint: 'PUBLIC_',
     },
-    config: {
+    configFile: {
         type: 'string',
         description: 'Config file path',
         valueHint: 'flamme.config.js',

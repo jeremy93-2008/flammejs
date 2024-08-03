@@ -1,11 +1,12 @@
 import { type Loader, type Plugin } from 'esbuild'
 import { loadConfig } from 'c12'
 import { useFlammeCurrentDirectory } from './useFlammeCurrentDirectory'
+import { useFlammeCacheDirEntries } from './useFlammeCacheDirEntries'
+import { useFlammeArgs } from './useFlammeArgs'
 import CSSModules from 'esbuild-css-modules-plugin'
 import { type SassPluginOptions } from 'esbuild-sass-plugin'
 // @ts-ignore
 import { stylusLoader } from 'esbuild-stylus-loader'
-import { useFlammeCacheDirEntries } from './useFlammeCacheDirEntries'
 
 export interface IFlammeConfigFile {
     // base url
@@ -63,11 +64,16 @@ export interface IFlammeConfigFile {
 
 export async function useFlammeConfig() {
     const { currentDirectory } = await useFlammeCurrentDirectory()
+    // set args to global flamme args
+    const [args] = useFlammeArgs()
 
     const c12 = await loadConfig<Required<IFlammeConfigFile>>({
         cwd: currentDirectory,
         name: 'flamme',
         dotenv: true,
+        configFile: args?.configFile,
+        // @ts-ignore
+        overrides: args,
         defaultConfig: {
             root: '/',
             base: './',

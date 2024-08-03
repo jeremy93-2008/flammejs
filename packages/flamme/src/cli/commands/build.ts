@@ -7,6 +7,7 @@ import { useFlammeBuildMode } from '../../hooks/useFlammeBuildMode'
 import { formatShortDate } from '../../utils/formatShortDate'
 import { args } from '../helpers/args'
 import { rimraf } from 'rimraf'
+import { useFlammeArgs } from '../../hooks/useFlammeArgs'
 
 export default defineCommand({
     meta: {
@@ -20,6 +21,9 @@ export default defineCommand({
         // set build mode to development
         const [_, setMode] = useFlammeBuildMode()
         setMode('production')
+        // set args to global flamme args
+        const [__, setArgs] = useFlammeArgs()
+        setArgs(args)
 
         console.log(
             formatShortDate(new Date()),

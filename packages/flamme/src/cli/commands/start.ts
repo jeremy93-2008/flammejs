@@ -4,6 +4,7 @@ import { listenServer } from '../listen'
 import { useFlammeBuildMode } from '../../hooks/useFlammeBuildMode'
 import { useFlammeCurrentDirectory } from '../../hooks/useFlammeCurrentDirectory'
 import { useFlammeConfig } from '../../hooks/useFlammeConfig'
+import { useFlammeArgs } from '../../hooks/useFlammeArgs'
 import { args } from '../helpers/args'
 
 export default defineCommand({
@@ -17,6 +18,9 @@ export default defineCommand({
         // set build mode to development
         const [_, setMode] = useFlammeBuildMode()
         setMode('production')
+        // set args to global flamme args
+        const [__, setArgs] = useFlammeArgs()
+        setArgs(args)
 
         const { currentDirectory } = await useFlammeCurrentDirectory()
         const { config } = await useFlammeConfig()
