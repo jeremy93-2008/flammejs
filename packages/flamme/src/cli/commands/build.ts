@@ -1,18 +1,18 @@
 import colors from 'colors'
-import { defineCommand, parseArgs } from 'citty'
+import path from 'node:path'
+import { defineCommand } from 'citty'
 import { createFlamme } from '../flamme'
 import { buildEndpoint } from '../build'
 import { useFlammeBuildMode } from '../../hooks/useFlammeBuildMode'
 import { formatShortDate } from '../../utils/formatShortDate'
-import path from 'node:path'
-import { rimraf } from 'rimraf'
 import { args } from '../helpers/args'
+import { rimraf } from 'rimraf'
 
 export default defineCommand({
     meta: {
         name: 'build',
         description: 'Build the app',
-        version: '0.0.1-alpha.4',
+        version: '0.0.1-alpha.5',
     },
     args,
     run: async ({ args }) => {

@@ -3,20 +3,15 @@ import { createFlamme } from '../flamme'
 import { watchAndListenFlamme } from '../watch'
 import { buildEndpoint } from '../build'
 import { useFlammeBuildMode } from '../../hooks/useFlammeBuildMode'
+import { args } from '../helpers/args'
 
 export default defineCommand({
     meta: {
         name: 'dev',
         description: 'Start the development server',
-        version: '0.0.1-alpha.4',
+        version: '0.0.1-alpha.5',
     },
-    args: {
-        port: {
-            type: 'string',
-            description: 'Port to listen to',
-            required: false,
-        },
-    },
+    args,
     run: async ({ args }) => {
         // set build mode to development
         const [_, setMode] = useFlammeBuildMode()

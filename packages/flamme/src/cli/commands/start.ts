@@ -1,23 +1,18 @@
+import path from 'node:path'
 import { defineCommand } from 'citty'
-import { useFlammeBuildMode } from '../../hooks/useFlammeBuildMode'
 import { listenServer } from '../listen'
+import { useFlammeBuildMode } from '../../hooks/useFlammeBuildMode'
 import { useFlammeCurrentDirectory } from '../../hooks/useFlammeCurrentDirectory'
 import { useFlammeConfig } from '../../hooks/useFlammeConfig'
-import path from 'node:path'
+import { args } from '../helpers/args'
 
 export default defineCommand({
     meta: {
         name: 'start',
         description: 'Start the Flamme server',
-        version: '0.0.1-alpha.4',
+        version: '0.0.1-alpha.5',
     },
-    args: {
-        port: {
-            type: 'string',
-            description: 'Port to listen to',
-            required: false,
-        },
-    },
+    args,
     run: async ({ args }) => {
         // set build mode to development
         const [_, setMode] = useFlammeBuildMode()
