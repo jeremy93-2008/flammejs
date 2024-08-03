@@ -1,6 +1,6 @@
 {
   "name": "flammejs-project",
-  "version": "0.0.1-alpha.4",
+  "version": "0.0.1-alpha.5",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -10,7 +10,7 @@
     "node": "^18.0.0 || >=20.0.0"
   },
   "keywords": [],
-  "author": "",
+  "author": "Jeremy Auvray",
   "license": "MIT",
   "workspaces": [
     "packages/**/*",
@@ -21,6 +21,6 @@
     "prettier": "^3.3.2"
   },
   "dependencies": {
-    "flamme": "^0.0.1-alpha.4"
+    "flamme": "^0.0.1-alpha.5"
   }
 }

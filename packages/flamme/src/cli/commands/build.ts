@@ -1,11 +1,12 @@
 import colors from 'colors'
-import { defineCommand } from 'citty'
+import { defineCommand, parseArgs } from 'citty'
 import { createFlamme } from '../flamme'
 import { buildEndpoint } from '../build'
 import { useFlammeBuildMode } from '../../hooks/useFlammeBuildMode'
 import { formatShortDate } from '../../utils/formatShortDate'
 import path from 'node:path'
 import { rimraf } from 'rimraf'
+import { args } from '../helpers/args'
 
 export default defineCommand({
     meta: {
@@ -13,7 +14,8 @@ export default defineCommand({
         description: 'Build the app',
         version: '0.0.1-alpha.4',
     },
-    run: async () => {
+    args,
+    run: async ({ args }) => {
         let buildTime = performance.now()
         // set build mode to development
         const [_, setMode] = useFlammeBuildMode()

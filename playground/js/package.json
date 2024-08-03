@@ -1,6 +1,6 @@
 {
   "name": "flamme-playground-js",
-  "version": "0.0.1-alpha.4",
+  "version": "0.0.1-alpha.5",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -14,7 +14,7 @@
   "engines": {
     "node": "^18.0.0 || >=20.0.0"
   },
-  "author": "",
+  "author": "Jeremy Auvray",
   "license": "MIT",
   "dependencies": {
     "@types/react": "^18.3.3",
