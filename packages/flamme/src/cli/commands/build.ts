@@ -4,10 +4,10 @@ import { defineCommand } from 'citty'
 import { createFlamme } from '../flamme'
 import { buildEndpoint } from '../build'
 import { useFlammeBuildMode } from '../../hooks/useFlammeBuildMode'
+import { useFlammeArgs } from '../../hooks/useFlammeArgs'
 import { formatShortDate } from '../../utils/formatShortDate'
 import { args } from '../helpers/args'
 import { rimraf } from 'rimraf'
-import { useFlammeArgs } from '../../hooks/useFlammeArgs'
 
 export default defineCommand({
     meta: {
