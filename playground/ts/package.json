@@ -9,6 +9,7 @@
     "build": "node ../../packages/flamme/dist/cli/index.js build",
     "start": "node ../../packages/flamme/dist/cli/index.js start",
     "start:debug": "node inspect ../../packages/flamme/dist/cli/index.js start",
+    "vercel": "node ../../packages/plugins/flamme-vercel/dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "engines": {
