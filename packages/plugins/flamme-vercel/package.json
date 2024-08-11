@@ -1,6 +1,6 @@
 {
   "name": "flamme-vercel",
-  "version": "0.0.1-alpha.6",
+  "version": "0.0.1-alpha.7",
   "description": "A package to deploy your Flamme app to Vercel",
   "bin": {
     "flamme-vercel": "dist/index.js"
@@ -8,6 +8,17 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsup src/index.ts --minify --format cjs --out-dir dist"
+  },
+  "files": [
+    "dist"
+  ],
+  "homepage": "https://github.com/jeremy93-2008/flammejs/tree/main/packages/plugins/flamme-vercel#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jeremy93-2008/flammejs.git"
+  },
+  "engines": {
+    "node": "^18.0.0 || >=20.0.0"
   },
   "author": "Jeremy Auvray",
   "license": "MIT",
