@@ -15,7 +15,7 @@ const main = defineCommand({
     meta: {
         name: 'flamme-vercel',
         description: 'Deploy your Flamme app to Vercel',
-        version: '0.0.1-alpha.9',
+        version: '0.0.1-alpha.10',
     },
     args: {
         noBuild: {
