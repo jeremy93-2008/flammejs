@@ -41,4 +41,4 @@ This will deploy your project to Vercel and provide you with a unique URL for yo
 
 
 ## License
-This project is licensed under the MIT License. See the [LICENSE](../../../LICENSE) file for details.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
