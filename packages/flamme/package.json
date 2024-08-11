@@ -1,6 +1,6 @@
 {
   "name": "flamme",
-  "version": "0.0.1-alpha.8",
+  "version": "0.0.1-alpha.9",
   "description": "Flamme is a meta-framework that leverages the h3 HTTP server and React for both server-side rendering (SSR) and client-side rendering, providing a seamless development experience for modern web applications.",
   "main": "./dist/core/index.js",
   "types": "./dist/core/index.d.ts",

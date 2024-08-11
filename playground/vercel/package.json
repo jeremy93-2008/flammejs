@@ -1,12 +1,13 @@
 {
-  "name": "flamme-template-ts",
+  "name": "flamme-playground-vercel",
   "version": "0.0.1-alpha.9",
-  "description": "A template for creating a new Flamme project using TypeScript.",
+  "description": "",
   "main": "index.js",
   "scripts": {
     "dev": "flamme dev",
     "build": "flamme build",
-    "start": "flamme start"
+    "start": "flamme start",
+    "build:vercel": "flamme build && flamme-vercel"
   },
   "engines": {
     "node": "^18.0.0 || >=20.0.0"
@@ -15,6 +16,7 @@
   "license": "MIT",
   "dependencies": {
     "flamme": "^0.0.1-alpha.9",
+    "flamme-vercel": "^0.0.1-alpha.9",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

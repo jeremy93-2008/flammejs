@@ -11,7 +11,7 @@ export default defineCommand({
     meta: {
         name: 'start',
         description: 'Start the Flamme server',
-        version: '0.0.1-alpha.8',
+        version: '0.0.1-alpha.9',
     },
     args,
     run: async ({ args }) => {

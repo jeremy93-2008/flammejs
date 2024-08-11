@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import colors from 'colors'
 import { defineCommand, runMain } from 'citty'
 import { formatShortDate } from './utils/formatShortDate'
@@ -14,7 +15,7 @@ const main = defineCommand({
     meta: {
         name: 'flamme-vercel',
         description: 'Deploy your Flamme app to Vercel',
-        version: '0.0.1-alpha.8',
+        version: '0.0.1-alpha.9',
     },
     args: {
         noBuild: {
