@@ -106,7 +106,7 @@ const main = defineCommand({
         // We create the vc config file for Vercel
         writeJSONSync('.vercel/output/functions/index.func/.vc-config.json', {
             handler: `server.${hashKey}.js`,
-            runtime: 'nodejs',
+            runtime: 'nodejs@18.x',
             launcherType: 'Nodejs',
             supportsResponseStreaming: true,
         })
