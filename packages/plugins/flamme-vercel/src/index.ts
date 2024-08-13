@@ -103,10 +103,24 @@ const main = defineCommand({
         )
         const hashKey = buildManifest.default.hashKey
 
+        // We create the index files for the serverless, compatible with Vercel
+        fsExtra.writeFileSync(
+            '.vercel/output/functions/index.func/index.js',
+            `
+            const { createServer } = require('node:http')
+            const { toNodeListener } = require('h3')
+            const server = require('./server.${hashKey}.js')
+            
+            const app = server.default
+
+            module.exports = createServer(toNodeListener(app))
+        `
+        )
+
         // We create the vc config file for Vercel
         writeJSONSync('.vercel/output/functions/index.func/.vc-config.json', {
-            handler: `server.${hashKey}.js`,
-            runtime: 'nodejs@18.x',
+            handler: `index.js`,
+            runtime: 'nodejs20.x',
             launcherType: 'Nodejs',
             supportsResponseStreaming: true,
         })
@@ -116,6 +130,26 @@ const main = defineCommand({
             path.resolve(currentDirectory, buildDir),
             '.vercel/output/functions/index.func'
         )
+
+        // We copy node_modules (h3 and dependencies) to the functions directory
+        ;[
+            'h3',
+            'cookie-es',
+            'crossws',
+            'defu',
+            'destr',
+            'iron-webcrypto',
+            'ohash',
+            'radix3',
+            'ufo',
+            'uncrypto',
+            'unenv',
+        ].forEach((module) => {
+            fsExtra.copySync(
+                path.resolve(currentDirectory, 'node_modules', module),
+                `.vercel/output/functions/index.func/node_modules/${module}`
+            )
+        })
 
         console.log(
             formatShortDate(new Date()),
