@@ -119,7 +119,11 @@ export async function createFlammeEntrypoints({
             app.use(
                 "${config.root || '/'}",
                 defineEventHandler((event) => {
-                    if(event.path === "${config.root || '/'}") return undefined
+                    // Check if the request is for a static asset
+                    const regex = new RegExp(/\\${config.root || '/'}(.*)\\.(.+)/)
+                    // If the request is not for a static asset, return undefined and then h3 will check the next handler
+                    if(!regex.test(event.path)) return undefined    
+                                    
                     return serveStatic(event, {
                         getContents: (id) => {
                             if(id === '/server.${hashKey}.js') return null

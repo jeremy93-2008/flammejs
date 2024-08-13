@@ -15,7 +15,7 @@ const main = defineCommand({
     meta: {
         name: 'flamme-vercel',
         description: 'Deploy your Flamme app to Vercel',
-        version: '0.0.1-alpha.10',
+        version: '0.0.1-alpha.23',
     },
     args: {
         noBuild: {
@@ -34,6 +34,8 @@ const main = defineCommand({
             currentDirectory,
             configFile: args.configFile,
         })
+        const root = config.root
+        const serverBaseUrl = config.serverBaseUrl
         let buildDir = config.buildDir
 
         if (!args.noBuild) {
@@ -81,6 +83,27 @@ const main = defineCommand({
         // We create the vercel config file
         writeJSONSync('.vercel/output/config.json', {
             version: 3,
+            routes: [
+                {
+                    handle: 'filesystem',
+                },
+                {
+                    src: `${serverBaseUrl}`,
+                    dest: '/',
+                },
+                {
+                    src: `${serverBaseUrl}/(.*)`,
+                    dest: '/',
+                },
+                {
+                    src: `${root}(.*)`,
+                    dest: '/',
+                },
+                {
+                    src: `${root}`,
+                    dest: `/`,
+                },
+            ],
         })
 
         //We copy the build directory to the static directory, but no server files

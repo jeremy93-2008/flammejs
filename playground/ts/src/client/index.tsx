@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { FlammeAssets } from 'flamme/client'
 // @ts-ignore
-import { hello } from './styles.module.css'
+import styles from './styles.module.css'
 import './styles.css'
 import './estilo.scss'
 import './lestyle.less'
@@ -28,7 +28,7 @@ export default function Index() {
             <body>
                 <div className="app">
                     <h1 className="text-3xl">Hello, Flamme!</h1>
-                    <p className={hello}>Counter: {counter}</p>
+                    <p className={styles.hello}>Counter: {counter}</p>
                     <button
                         className="bg-blue-300 px-3 py-1 rounded-md"
                         onClick={() => setCounter(counter + 1)}

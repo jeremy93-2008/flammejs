@@ -1,7 +1,6 @@
 import { type Loader, type Plugin } from 'esbuild'
 import { loadConfig } from 'c12'
-import CSSModules from 'esbuild-css-modules-plugin'
-import { type SassPluginOptions } from 'esbuild-sass-plugin'
+import { type SassPluginOptions, postcssModules } from 'esbuild-sass-plugin'
 // @ts-ignore
 import { stylusLoader } from 'esbuild-stylus-loader'
 
@@ -35,7 +34,7 @@ export interface IFlammeConfigFile {
     // css options
     css: {
         // css modules options
-        cssModules?: Parameters<typeof CSSModules>[0]
+        cssModules?: Parameters<typeof postcssModules>[0]
         // sass options
         sass?: SassPluginOptions
         // less options
@@ -91,17 +90,11 @@ export async function useFlammeConfig({
 
             css: {
                 cssModules: {
-                    // @see https://github.com/indooorsman/esbuild-css-modules-plugin/blob/main/index.d.ts for more details
-                    force: true,
-                    emitDeclarationFile: false,
-                    localsConvention: 'camelCaseOnly',
-                    namedExports: true,
-                    inject: false,
+                    localsConvention: 'camelCase',
+                    scopeBehaviour: 'local',
+                    hashPrefix: 'styles',
                 },
-                sass: {
-                    filter: /\.scss$/,
-                    type: 'css',
-                },
+                sass: {},
                 less: {},
                 stylus: {},
                 tailwindcss: {},

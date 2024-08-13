@@ -4,8 +4,7 @@ import * as fs from 'node:fs'
 import { rimraf } from 'rimraf'
 import { useFlammeCurrentDirectory } from '../hooks/useFlammeCurrentDirectory'
 import { useFlammeBuildMode } from '../hooks/useFlammeBuildMode'
-import CssModulesPlugin from 'esbuild-css-modules-plugin'
-import { sassPlugin } from 'esbuild-sass-plugin'
+import { sassPlugin, postcssModules } from 'esbuild-sass-plugin'
 import { lessLoader } from 'esbuild-plugin-less'
 // @ts-ignore
 import { stylusLoader } from 'esbuild-stylus-loader'
@@ -99,13 +98,37 @@ function getBuildPlugins(
 ) {
     const [mode] = useFlammeBuildMode()
 
-    // Create plugin array for esbuild, based on the configuration
-    const plugins: Plugin[] = [
-        CssModulesPlugin(config.css.cssModules),
-        sassPlugin(config.css.sass),
+    // Create empty plugin array
+    const plugins: Plugin[] = []
+
+    const [buildLoader] = useFlammeBuildLoader()
+
+    // Tailwindcss configuration path
+    const tailwindcssConfigPath = path.resolve(
+        currentDirectory,
+        config.css.tailwindcss?.configPath ??
+            (buildLoader === 'ts' ? 'tailwind.config.ts' : 'tailwind.config.js')
+    )
+
+    // Add tailwindcss plugin if the configuration file exists, order is important
+    if (fs.existsSync(tailwindcssConfigPath)) {
+        plugins.push(
+            tailwindPlugin({
+                cssModulesEnabled: true,
+                configPath: tailwindcssConfigPath,
+            })
+        )
+    }
+
+    // add sass, less, stylus plugins by order
+    plugins.push(
+        sassPlugin({
+            ...config.css.sass,
+            transform: postcssModules(config.css.cssModules ?? {}),
+        }),
         lessLoader(config.css.less),
-        stylusLoader(config.css.stylus),
-    ]
+        stylusLoader(config.css.stylus)
+    )
 
     // Add public folder copy plugin if exists
     if (fs.existsSync(path.resolve(currentDirectory, config.publicDir))) {
@@ -132,24 +155,6 @@ function getBuildPlugins(
         )
     }
 
-    const [buildLoader] = useFlammeBuildLoader()
-
-    // Tailwindcss configuration path
-    const tailwindcssConfigPath = path.resolve(
-        currentDirectory,
-        config.css.tailwindcss?.configPath ??
-            (buildLoader === 'ts' ? 'tailwind.config.ts' : 'tailwind.config.js')
-    )
-
-    // Add tailwindcss plugin if enabled and configuration file exists
-    if (fs.existsSync(tailwindcssConfigPath)) {
-        plugins.push(
-            tailwindPlugin({
-                cssModulesEnabled: true,
-                configPath: tailwindcssConfigPath,
-            })
-        )
-    }
     return [...plugins, ...config.esbuild.plugins]
 }
 
@@ -200,6 +205,7 @@ export async function buildClientEndpoint({
             NODE_ENV: mode,
             ...(await getPublicEnv()),
         },
+        publicPath: config.base,
         outfile: buildPath,
         sourcemap: mode === 'development',
         minify: mode === 'production',
@@ -237,6 +243,7 @@ export async function buildServerEndpoint({
             NODE_ENV: mode,
             ...(await getEnv()),
         },
+        publicPath: config.base,
         outfile: buildPath,
         sourcemap: mode === 'development',
         minify: mode === 'production',

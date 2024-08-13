@@ -1,14 +1,15 @@
 {
   "name": "flamme-playground-vercel",
-  "version": "0.0.1-alpha.10",
+  "version": "0.0.1-alpha.23",
   "description": "",
   "main": "index.js",
   "scripts": {
     "dev": "flamme dev",
     "build": "flamme build",
     "start": "flamme start",
-    "build:vercel": "flamme-vercel --noBuild",
-    "vercel-build": "npm run build:vercel"
+    "build:vercel": "flamme-vercel",
+    "vercel-build": "npm run build:vercel",
+    "postinstall": "npm rebuild esbuild lightningcss"
   },
   "engines": {
     "node": "^18.0.0 || >=20.0.0"
@@ -16,9 +17,8 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "esbuild-plugin-tailwindcss": "^1.2.1",
-    "flamme": "^0.0.1-alpha.10",
-    "flamme-vercel": "^0.0.1-alpha.17",
+    "flamme": "^0.0.1-alpha.23",
+    "flamme-vercel": "^0.0.1-alpha.23",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

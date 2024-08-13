@@ -1,6 +1,6 @@
 {
   "name": "flamme",
-  "version": "0.0.1-alpha.10",
+  "version": "0.0.1-alpha.23",
   "description": "Flamme is a meta-framework that leverages the h3 HTTP server and React for both server-side rendering (SSR) and client-side rendering, providing a seamless development experience for modern web applications.",
   "main": "./dist/core/index.js",
   "types": "./dist/core/index.d.ts",
@@ -57,9 +57,10 @@
     "colors": "^1.4.0",
     "dotenv": "^16.4.5",
     "esbuild": "^0.23.0",
-    "esbuild-css-modules-plugin": "^3.1.2",
     "esbuild-plugin-copy": "^2.1.1",
     "esbuild-plugin-less": "^1.3.8",
+    "esbuild-plugin-react18-css": "^0.0.4",
+    "esbuild-plugin-tailwindcss": "^1.2.0",
     "esbuild-sass-plugin": "^3.3.1",
     "esbuild-stylus-loader": "^0.4.2",
     "h3": "^1.12.0",
@@ -79,7 +80,6 @@
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@types/ws": "^8.5.11",
-    "esbuild-plugin-tailwindcss": "^1.2.0",
     "tsup": "^8.1.0",
     "typescript": "^5.5.3"
   }

@@ -2,7 +2,7 @@ import { defineFlammeConfig } from 'flamme'
 
 export default defineFlammeConfig({
     root: '/',
-    base: './',
+    base: '/',
     serverBaseUrl: '/api',
 
     clientDir: 'src/client',

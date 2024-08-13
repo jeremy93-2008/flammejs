@@ -20,7 +20,7 @@ export default function Index() {
                 <div className={styles.container}>
                     <img
                         className={styles.flammeImage}
-                        src="./flamme.png"
+                        src="/flamme.png"
                         alt="Flamme logo"
                     />
                     <h1 className={styles.flammeTitle}>
