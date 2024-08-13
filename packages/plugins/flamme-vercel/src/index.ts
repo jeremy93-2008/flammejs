@@ -131,25 +131,30 @@ const main = defineCommand({
             '.vercel/output/functions/index.func'
         )
 
-        // We copy node_modules (h3 and dependencies) to the functions directory
-        ;[
-            'h3',
-            'cookie-es',
-            'crossws',
-            'defu',
-            'destr',
-            'iron-webcrypto',
-            'ohash',
-            'radix3',
-            'ufo',
-            'uncrypto',
-            'unenv',
-        ].forEach((module) => {
-            fsExtra.copySync(
-                path.resolve(currentDirectory, 'node_modules', module),
-                `.vercel/output/functions/index.func/node_modules/${module}`
+        // We copy node_modules dependencies needed for our index script to power up our server in the vercel server to the functions directory
+        const dependencies = ['h3']
+        for (const dep of dependencies) {
+            // We read the package.json file to get the dependencies
+            const packageJSON = fsExtra.readJSONSync(
+                path.resolve(
+                    currentDirectory,
+                    'node_modules',
+                    dep,
+                    'package.json'
+                )
             )
-        })
+            // We add all the possible dependencies to the list
+            if (packageJSON.dependencies) {
+                Object.keys(packageJSON.dependencies).forEach((d) => {
+                    dependencies.push(d)
+                })
+            }
+            // We copy the current dependency iteration to the functions directory
+            fsExtra.copySync(
+                path.resolve(currentDirectory, 'node_modules', dep),
+                `.vercel/output/functions/index.func/node_modules/${dep}`
+            )
+        }
 
         console.log(
             formatShortDate(new Date()),
