@@ -5,6 +5,7 @@ import './index.css'
 import styles from './style.module.css'
 
 export default function Index() {
+    const [count, setCount] = React.useState(0)
     return (
         <html>
             <head>
@@ -20,7 +21,7 @@ export default function Index() {
                 <div className={styles.container}>
                     <img
                         className={styles.flammeImage}
-                        src="./flamme.png"
+                        src="/flamme.png"
                         alt="Flamme logo"
                     />
                     <h1 className={styles.flammeTitle}>
@@ -30,12 +31,21 @@ export default function Index() {
                         This is a template for creating a new Flamme app with
                         TypeScript.
                     </p>
+
                     <p className={styles.flammeText2}>
                         To get started, edit{' '}
                         <code className={styles.flammeCode}>
                             src/client/index.tsx
                         </code>{' '}
                         and save to reload.
+                    </p>
+                    <p className={styles.flammeCounter}>
+                        <p>
+                            Counter: <span>{count}</span>
+                        </p>
+                        <button onClick={() => setCount(count + 1)}>
+                            Increment
+                        </button>
                     </p>
                 </div>
             </body>
