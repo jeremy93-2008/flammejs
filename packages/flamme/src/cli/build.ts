@@ -203,7 +203,6 @@ export async function buildClientEndpoint({
         bundle: true,
         define: {
             NODE_ENV: mode,
-            ...(await getPublicEnv()),
         },
         publicPath: config.base,
         outfile: buildPath,
