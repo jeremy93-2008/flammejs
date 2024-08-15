@@ -31,7 +31,6 @@ export default function Index() {
                         This is a template for creating a new Flamme app with
                         TypeScript.
                     </p>
-
                     <p className={styles.flammeText2}>
                         To get started, edit{' '}
                         <code className={styles.flammeCode}>
@@ -40,9 +39,9 @@ export default function Index() {
                         and save to reload.
                     </p>
                     <p className={styles.flammeCounter}>
-                        <p>
+                        <span className={styles.flammeCounterText}>
                             Counter: <span>{count}</span>
-                        </p>
+                        </span>
                         <button onClick={() => setCount(count + 1)}>
                             Increment
                         </button>

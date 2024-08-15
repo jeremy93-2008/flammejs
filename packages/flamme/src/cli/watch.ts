@@ -1,7 +1,5 @@
 import type { Listener } from 'listhen'
 import chokidar from 'chokidar'
-import { hash } from 'ohash'
-import { rimraf } from 'rimraf'
 import colors from 'colors/safe'
 import path from 'node:path'
 import {
@@ -12,9 +10,7 @@ import { buildEndpoint } from './build'
 import { listenServer } from './listen'
 import { formatShortDate } from '../utils/formatShortDate'
 import { serveAndListenHMRFlamme } from './hmr'
-import { useFlammeCurrentDirectory } from '../hooks/useFlammeCurrentDirectory'
 import { createFlamme } from './flamme'
-import * as fs from 'node:fs'
 
 interface IWatchAndListenFlammeParams {
     currentDirectory: string
@@ -33,6 +29,11 @@ interface IWatchAndListenFlammeParams {
     hashKey: string
     config: Required<IFlammeConfigFile>
     port: number
+    open: boolean
+    isProduction?: boolean
+    isPublic?: boolean
+    hasTunnel?: boolean
+    qr?: boolean
 }
 
 export async function watchAndListenFlamme(
@@ -94,12 +95,20 @@ export async function watchAndListenFlamme(
             buildServerPath: nextBuildServerPath(newHashKey),
             port: nextConfig.devServerPort ?? port,
             reload: true,
+            isProduction: params.isProduction,
+            isPublic: params.isPublic,
+            hasTunnel: params.hasTunnel,
         })
     })
 
     listener = await listenServer({
         buildServerPath: buildServerPath(hashKey),
         port,
+        open: params.open,
+        isProduction: params.isProduction,
+        isPublic: params.isPublic,
+        hasTunnel: params.hasTunnel,
+        qr: params.qr,
     })
 
     console.log(

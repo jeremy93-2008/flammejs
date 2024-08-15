@@ -11,9 +11,17 @@ export default defineCommand({
     meta: {
         name: 'start',
         description: 'Start the Flamme server',
-        version: '0.0.1-alpha.26',
+        version: '0.0.1-alpha.27',
     },
-    args,
+    args: {
+        prod: {
+            type: 'boolean',
+            description: 'Start the server in production mode',
+            valueHint: 'true',
+            default: true,
+        },
+        ...args,
+    },
     run: async ({ args }) => {
         // set build mode to development
         const [_, setMode] = useFlammeBuildMode()
@@ -40,6 +48,10 @@ export default defineCommand({
         await listenServer({
             buildServerPath,
             port: Number(args.port) ?? config.devServerPort,
+            isProduction: args.prod,
+            isPublic: Boolean(args.public),
+            qr: Boolean(args.qr),
+            hasTunnel: Boolean(args.tunnel),
         })
     },
 })

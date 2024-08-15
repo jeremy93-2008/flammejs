@@ -9,7 +9,7 @@ import colors from 'colors'
 const main = defineCommand({
     meta: {
         name: 'create-flamme-app',
-        version: '0.0.1-alpha.26',
+        version: '0.0.1-alpha.27',
         description: 'Create Flamme App',
     },
     args: {
@@ -42,7 +42,7 @@ const main = defineCommand({
             console.error(
                 colors.red('[create-flamme-app] Invalid project name')
             )
-            showUsage(main)
+            await showUsage(main)
             process.exit(1)
         }
 
@@ -50,7 +50,7 @@ const main = defineCommand({
             console.error(
                 colors.red('[create-flamme-app] Invalid template type')
             )
-            showUsage(main)
+            await showUsage(main)
             process.exit(1)
         }
 

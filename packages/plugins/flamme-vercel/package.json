@@ -1,6 +1,6 @@
 {
   "name": "flamme-vercel",
-  "version": "0.0.1-alpha.26",
+  "version": "0.0.1-alpha.27",
   "description": "A package to deploy your Flamme app to Vercel",
   "bin": {
     "flamme-vercel": "dist/index.js"
@@ -8,7 +8,8 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsup src/index.ts --minify --format cjs --out-dir dist",
-    "prepack": "npm run build"
+    "build:prod": "npm run build -- --minify",
+    "prepack": "npm run build:prod"
   },
   "files": [
     "dist"

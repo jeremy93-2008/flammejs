@@ -5,19 +5,24 @@ import { buildEndpoint } from '../build'
 import { useFlammeBuildMode } from '../../hooks/useFlammeBuildMode'
 import { useFlammeArgs } from '../../hooks/useFlammeArgs'
 import { args } from '../helpers/args'
-import { openBrowser } from '../openBrowser'
 
 export default defineCommand({
     meta: {
         name: 'dev',
         description: 'Start the development server',
-        version: '0.0.1-alpha.26',
+        version: '0.0.1-alpha.27',
     },
     args: {
         open: {
             type: 'boolean',
             description: 'Open browser',
             valueHint: 'true',
+        },
+        prod: {
+            type: 'boolean',
+            description: 'Start the server in production mode',
+            valueHint: 'false',
+            default: false,
         },
         ...args,
     },
@@ -65,12 +70,11 @@ export default defineCommand({
             hashKey,
             config,
             port,
+            open: args.open,
+            isProduction: args.prod,
+            isPublic: Boolean(args.public),
+            hasTunnel: Boolean(args.tunnel),
+            qr: Boolean(args.qr),
         })
-
-        if (args.open) {
-            await openBrowser({
-                port,
-            })
-        }
     },
 })

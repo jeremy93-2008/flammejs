@@ -63,4 +63,19 @@ export const args: Record<ArgsKey | string, ArgDef> = {
         description: 'Config file path',
         valueHint: 'flamme.config.js',
     },
+    public: {
+        type: 'boolean',
+        description: 'Public mode',
+        valueHint: 'false',
+    },
+    qr: {
+        type: 'boolean',
+        description: 'QR code',
+        valueHint: 'false',
+    },
+    tunnel: {
+        type: 'boolean',
+        description: 'Tunnel',
+        valueHint: 'false',
+    },
 }
