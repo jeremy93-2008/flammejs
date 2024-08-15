@@ -76,8 +76,9 @@ my-new-app/
 │   │   ├── api/
 │   │   └── index.ts
 │   └── index.tsx
+├── .gitignore
 ├── package.json
-└── README.md
+└── flamme.config.ts
 ```
 
 ## Configuration
