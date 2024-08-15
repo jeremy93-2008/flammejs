@@ -85,7 +85,7 @@ my-new-app/
 Flamme can be configured via a `flamme.config.ts` file in the root of your project. Here is an example configuration:
 
 ```js
-module.exports = {
+export default defineFlammeConfig({
     root: '/',
     base: './',
     serverBaseUrl: '/api',
@@ -99,25 +99,31 @@ module.exports = {
     envPublicPrefix: 'PUBLIC_',
     css: {
         cssModules: {
-            force: true,
-            emitDeclarationFile: false,
-            localsConvention: 'camelCaseOnly',
-            namedExports: true,
-            inject: false,
+            localsConvention: 'camelCase',
+            scopeBehaviour: 'local',
+            generateScopedName: 'styles__[local]__[hash:base64:6]',
+            // for more options, see postcss-modules documentation
         },
         sass: {
             filter: /\.scss$/,
             type: 'css',
+            // for more options, see esbuild-sass documentation
         },
-        less: {},
-        stylus: {},
-        tailwindcss: {},
+        less: {
+            // for more options, see esbuild-less documentation}
+        },
+        stylus: {
+            // for more options, see esbuild-stylus documentation}
+        },
+        tailwindcss: {
+            configPath: 'tailwind.config.js',
+        },
     },
     esbuild: {
         loglevel: 'warning',
         plugins: [],
     },
-};
+});
 ```
 
 ## Commands
