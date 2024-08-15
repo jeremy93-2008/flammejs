@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "flamme dev",
+    "dev": "flamme dev --open",
     "build": "flamme build",
     "start": "flamme start",
     "build:vercel": "flamme-vercel",

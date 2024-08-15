@@ -5,6 +5,7 @@ import { buildEndpoint } from '../build'
 import { useFlammeBuildMode } from '../../hooks/useFlammeBuildMode'
 import { useFlammeArgs } from '../../hooks/useFlammeArgs'
 import { args } from '../helpers/args'
+import { openBrowser } from '../openBrowser'
 
 export default defineCommand({
     meta: {
@@ -12,7 +13,14 @@ export default defineCommand({
         description: 'Start the development server',
         version: '0.0.1-alpha.26',
     },
-    args,
+    args: {
+        open: {
+            type: 'boolean',
+            description: 'Open browser',
+            valueHint: 'true',
+        },
+        ...args,
+    },
     run: async ({ args }) => {
         // set build mode to development
         const [_, setMode] = useFlammeBuildMode()
@@ -45,6 +53,8 @@ export default defineCommand({
             buildServerPath: buildServerPath(hashKey),
         })
 
+        const port = args.port ? Number(args.port) : config.devServerPort
+
         // watch and listen flamme
         await watchAndListenFlamme({
             currentDirectory,
@@ -54,7 +64,13 @@ export default defineCommand({
             buildServerPath,
             hashKey,
             config,
-            port: args.port ? Number(args.port) : config.devServerPort,
+            port,
         })
+
+        if (args.open) {
+            await openBrowser({
+                port,
+            })
+        }
     },
 })
