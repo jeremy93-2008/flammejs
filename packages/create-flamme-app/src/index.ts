@@ -9,7 +9,7 @@ import colors from 'colors'
 const main = defineCommand({
     meta: {
         name: 'create-flamme-app',
-        version: '0.0.1-alpha.27',
+        version: '0.0.1-alpha.28',
         description: 'Create Flamme App',
     },
     args: {
