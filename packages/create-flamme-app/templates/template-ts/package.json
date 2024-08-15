@@ -1,6 +1,6 @@
 {
   "name": "flamme-template-ts",
-  "version": "0.0.1-alpha.25",
+  "version": "0.0.1-alpha.26",
   "description": "A template for creating a new Flamme project using TypeScript.",
   "main": "index.js",
   "scripts": {
@@ -14,7 +14,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "flamme": "^0.0.1-alpha.25",
+    "flamme": "^0.0.1-alpha.26",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

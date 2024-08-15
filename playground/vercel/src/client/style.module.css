@@ -30,6 +30,7 @@
         }
     }
     button {
+        width: 125px;
         border: solid 1px #5c697e;
         border-radius: 8px;
         background-color: #eee;

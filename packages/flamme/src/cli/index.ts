@@ -13,7 +13,7 @@ loadEnv().then()
 const main = defineCommand({
     meta: {
         name: 'flamme',
-        version: '0.0.1-alpha.25',
+        version: '0.0.1-alpha.26',
         description: 'Flamme CLI',
     },
     subCommands: {
