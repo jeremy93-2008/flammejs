@@ -7,7 +7,7 @@
   },
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsup src/index.ts --minify --format cjs --out-dir dist",
+    "build": "tsup src/index.ts --format cjs --out-dir dist",
     "build:prod": "npm run build -- --minify",
     "prepack": "npm run build:prod"
   },
