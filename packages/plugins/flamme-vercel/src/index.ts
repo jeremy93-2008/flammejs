@@ -15,13 +15,9 @@ const main = defineCommand({
     meta: {
         name: 'flamme-vercel',
         description: 'Deploy your Flamme app to Vercel',
-        version: '0.0.1-alpha.30',
+        version: '0.0.1-alpha.31',
     },
     args: {
-        noDeploy: {
-            type: 'boolean',
-            description: 'Skip the deploy step',
-        },
         noBuild: {
             type: 'boolean',
             description: 'Skip the build step',
@@ -50,13 +46,6 @@ const main = defineCommand({
             )
             buildDir = defaultBuildFolderName
             spawnSync(`flamme build --buildDir=${buildDir}`, {
-                shell: true,
-                stdio: 'inherit',
-            })
-        }
-
-        if (!args.noDeploy && !fsExtra.existsSync('.vercel/project.json')) {
-            spawnSync(`vercel init`, {
                 shell: true,
                 stdio: 'inherit',
             })
@@ -194,15 +183,8 @@ const main = defineCommand({
         console.log(
             formatShortDate(new Date()),
             colors.white('[flamme-vercel]'),
-            'Vercel structure created!'
+            'Vercel output created!'
         )
-
-        if (args.noDeploy) return
-
-        spawnSync(`vercel deploy`, {
-            shell: true,
-            stdio: 'inherit',
-        })
     },
 })
 

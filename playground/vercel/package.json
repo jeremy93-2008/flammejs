@@ -1,15 +1,13 @@
 {
   "name": "flamme-playground-vercel",
-  "version": "0.0.1-alpha.30",
+  "version": "0.0.1-alpha.31",
   "description": "",
   "main": "index.js",
   "scripts": {
     "dev": "flamme dev --open",
     "build": "flamme build",
-    "start": "flamme start",
-    "deploy:vercel": "flamme-vercel",
-    "build:vercel": "flamme-vercel --noDeploy",
-    "vercel-build": "npm run build:vercel",
+    "start": "flamme start",,,
+    "vercel-build": "flamme-vercel",
     "postinstall": "npm rebuild esbuild"
   },
   "engines": {
@@ -18,8 +16,8 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "flamme": "^0.0.1-alpha.30",
-    "flamme-vercel": "^0.0.1-alpha.30",
+    "flamme": "^0.0.1-alpha.31",
+    "flamme-vercel": "^0.0.1-alpha.31",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
