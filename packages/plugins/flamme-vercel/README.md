@@ -14,22 +14,24 @@ npm install flamme-vercel
 
 ## Usage
 
-```bash
-flamme-vercel
+In your `package.json` file, add the following scripts:
+
+```json
+{
+  "scripts": {
+    "vercel-build": "flamme-vercel"
+  }
+}
 ```
-This command will create .vercel folder based on the build output folder in your project.
 
-#### Parameters
+This command will generate the correct output into the .vercel folder, when Vercel will going to build your site on his page.
 
-- noBuild: Do not build the project, and take the output folder of the config flamme as it is.
-- noDeploy: Do not deploy the project to Vercel.
+## Deploy
 
-#### Deployment
+Then, you can deploy your project to Vercel as usual:
 
-By default, the plugin will deploy the project to Vercel. If you want to deploy the project to Vercel, you need to have an account on Vercel and have the Vercel CLI installed on your machine.
-    
 ```bash
-npm install -g vercel
+vercel
 ```
 
 ## License
