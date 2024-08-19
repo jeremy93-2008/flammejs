@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "flamme dev --open",
     "build": "flamme build",
-    "start": "flamme start",,,
+    "start": "flamme start",
     "vercel-build": "flamme-vercel",
     "postinstall": "npm rebuild esbuild"
   },
