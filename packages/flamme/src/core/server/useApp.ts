@@ -1,7 +1,7 @@
-import { H3Event } from 'h3'
+import { H3Event, type App } from 'h3'
 
-export const useApp = (event: H3Event) => {
+export const useApp = (event: H3Event): App => {
     if (typeof window !== 'undefined')
-        return 'This hook is only available on the server'
+        throw new Error('This hook is only available on the server')
     return event.context.app
 }

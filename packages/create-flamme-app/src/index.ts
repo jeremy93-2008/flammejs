@@ -9,7 +9,7 @@ import colors from 'colors'
 const main = defineCommand({
     meta: {
         name: 'create-flamme-app',
-        version: '0.0.1-alpha.32',
+        version: '0.0.1-alpha.33',
         description: 'Create Flamme App',
     },
     args: {
@@ -40,7 +40,8 @@ const main = defineCommand({
 
         if (!regex.test(projectName)) {
             console.error(
-                colors.red('[create-flamme-app] Invalid project name')
+                colors.red('[create-flamme-app]'),
+                colors.red('Invalid project name')
             )
             await showUsage(main)
             process.exit(1)
@@ -48,7 +49,8 @@ const main = defineCommand({
 
         if (!['ts', 'js'].includes(template)) {
             console.error(
-                colors.red('[create-flamme-app] Invalid template type')
+                colors.red('[create-flamme-app]'),
+                colors.red('Invalid template type')
             )
             await showUsage(main)
             process.exit(1)
@@ -63,11 +65,13 @@ const main = defineCommand({
                 !overwrite
             ) {
                 console.error(
-                    colors.red(`[create-flamme-app] Directory is not empty`)
+                    colors.red('[create-flamme-app]'),
+                    colors.red(`Directory is not empty`)
                 )
                 process.exit(1)
             }
             console.log(
+                colors.red('[create-flamme-app]'),
                 colors.yellow(
                     `⚠️ Overwriting existing directory. ${colors.red(projectName)}`
                 )
@@ -75,8 +79,14 @@ const main = defineCommand({
             fsExtra.removeSync(path.join(currentDirectory, projectName))
         }
 
-        console.log(`🔥 Creating Flamme App: ${colors.green(projectName)}`)
-        console.log(`📄 Template: ${colors.green(template)}`)
+        console.log(
+            colors.red('[create-flamme-app]'),
+            `🔥 Creating Flamme App: ${colors.green(projectName)}`
+        )
+        console.log(
+            colors.red('[create-flamme-app]'),
+            `📄 Template: ${colors.green(template)}`
+        )
         fs.mkdirSync(path.join(currentDirectory, projectName))
 
         const templatePath = path.join(
@@ -100,26 +110,49 @@ const main = defineCommand({
             JSON.stringify(pkgJSON, null, 2)
         )
 
+        fs.renameSync(
+            path.join(currentDirectory, projectName, '_gitignore'),
+            path.join(currentDirectory, projectName, '.gitignore')
+        )
+
         console.log(
-            `Flamme App created: ${colors.green(
+            colors.red('[create-flamme-app]'),
+            `Project created: ${colors.green(
                 path.join(currentDirectory, projectName)
             )}`
         )
 
-        console.log(colors.yellow('📦 Installing dependencies...'))
+        child.spawnSync('git', ['init'], {
+            cwd: path.join(currentDirectory, projectName),
+            stdio: 'ignore',
+        })
+
+        console.log(
+            colors.red('[create-flamme-app]'),
+            colors.green('📙 Git repository initialized')
+        )
+
+        console.log(
+            colors.red('[create-flamme-app]'),
+            colors.yellow('📦 Installing dependencies...')
+        )
 
         child.spawnSync('npm', ['install'], {
             cwd: path.join(currentDirectory, projectName),
             stdio: 'inherit',
         })
 
-        console.log(colors.green('✅ Dependencies installed'))
+        console.log(
+            colors.red('[create-flamme-app]'),
+            colors.green('✅  Dependencies installed')
+        )
 
         console.log(
+            colors.red('[create-flamme-app]'),
             colors.white('Run the following commands to start the app:')
         )
         console.log(`cd ${colors.green(projectName)}`)
-        console.log('> npm run dev')
+        console.log(colors.white('> npm run dev'))
         console.log(colors.rainbow('Happy coding!'))
     },
 })

@@ -1,7 +1,7 @@
-import { H3Event } from 'h3'
+import { H3Event, type Router } from 'h3'
 
-export const useRouter = (event: H3Event) => {
+export const useRouter = (event: H3Event): Router => {
     if (typeof window !== 'undefined')
-        return 'This hook is only available on the server'
+        throw new Error('This hook is only available on the server')
     return event.context.router
 }
