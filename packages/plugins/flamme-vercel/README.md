@@ -22,23 +22,15 @@ This command will create .vercel folder based on the build output folder in your
 #### Parameters
 
 - noBuild: Do not build the project, and take the output folder of the config flamme as it is.
+- noDeploy: Do not deploy the project to Vercel.
 
-### Deploy to Vercel
+#### Deployment
 
-To deploy your Flamme project to Vercel, you can use the Vercel CLI. First, install the Vercel CLI globally:
-
+By default, the plugin will deploy the project to Vercel. If you want to deploy the project to Vercel, you need to have an account on Vercel and have the Vercel CLI installed on your machine.
+    
 ```bash
 npm install -g vercel
 ```
-
-Then, deploy your project using the following command:
-
-```bash
-vercel
-```
-
-This will deploy your project to Vercel and provide you with a unique URL for your application.
-
 
 ## License
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.

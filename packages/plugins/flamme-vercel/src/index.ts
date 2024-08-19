@@ -15,9 +15,13 @@ const main = defineCommand({
     meta: {
         name: 'flamme-vercel',
         description: 'Deploy your Flamme app to Vercel',
-        version: '0.0.1-alpha.29',
+        version: '0.0.1-alpha.30',
     },
     args: {
+        noDeploy: {
+            type: 'boolean',
+            description: 'Skip the deploy step',
+        },
         noBuild: {
             type: 'boolean',
             description: 'Skip the build step',
@@ -51,14 +55,22 @@ const main = defineCommand({
             })
         }
 
+        if (!args.noDeploy && !fsExtra.existsSync('.vercel/project.json')) {
+            spawnSync(`vercel init`, {
+                shell: true,
+                stdio: 'inherit',
+            })
+        }
+
         console.log(
             formatShortDate(new Date()),
             colors.white('[flamme-vercel]'),
             'Preparing your Flamme app to Vercel...'
         )
 
-        if (existsSync('.vercel')) {
-            fsExtra.removeSync('.vercel')
+        // We remove the .vercel/output directory if it exists, and we kee the .vercel to keep project settings
+        if (existsSync('.vercel/output')) {
+            fsExtra.removeSync('.vercel/output')
         }
 
         console.log(
@@ -184,6 +196,13 @@ const main = defineCommand({
             colors.white('[flamme-vercel]'),
             'Vercel structure created!'
         )
+
+        if (args.noDeploy) return
+
+        spawnSync(`vercel deploy`, {
+            shell: true,
+            stdio: 'inherit',
+        })
     },
 })
 
