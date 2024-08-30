@@ -114,7 +114,6 @@ function getBuildPlugins(
     if (fs.existsSync(tailwindcssConfigPath)) {
         plugins.push(
             tailwindPlugin({
-                cssModulesEnabled: true,
                 configPath: tailwindcssConfigPath,
             })
         )
