@@ -2,18 +2,20 @@ import { build, type Loader, type Plugin } from 'esbuild'
 import path from 'node:path'
 import * as fs from 'node:fs'
 import { rimraf } from 'rimraf'
-import { useFlammeCurrentDirectory } from '../hooks/useFlammeCurrentDirectory'
-import { useFlammeBuildMode } from '../hooks/useFlammeBuildMode'
 import { sassPlugin, postcssModules } from 'esbuild-sass-plugin'
 import { lessLoader } from 'esbuild-plugin-less'
 // @ts-ignore
 import { stylusLoader } from 'esbuild-stylus-loader'
-import { tailwindPlugin } from 'esbuild-plugin-tailwindcss'
 import { copy } from 'esbuild-plugin-copy'
+import tailwindcss from 'tailwindcss'
+import { getEnv } from './env'
+import { useFlammeCurrentDirectory } from '../hooks/useFlammeCurrentDirectory'
+import { useFlammeBuildMode } from '../hooks/useFlammeBuildMode'
 import { IFlammeConfigFile, useFlammeConfig } from '../hooks/useFlammeConfig'
-import { getEnv, getPublicEnv } from './env'
 import { useFlammeCacheDirEntries } from '../hooks/useFlammeCacheDirEntries'
 import { useFlammeBuildLoader } from '../hooks/useFlammeBuildLoader'
+import autoprefixer from 'autoprefixer'
+import { AcceptedPlugin } from 'postcss'
 
 export interface IBuildEndpointParams {
     hashKey: string
@@ -103,6 +105,9 @@ function getBuildPlugins(
 
     const [buildLoader] = useFlammeBuildLoader()
 
+    // Create postcss plugins array
+    const postcssPlugins: AcceptedPlugin[] = [autoprefixer()]
+
     // Tailwindcss configuration path
     const tailwindcssConfigPath = path.resolve(
         currentDirectory,
@@ -110,20 +115,26 @@ function getBuildPlugins(
             (buildLoader === 'ts' ? 'tailwind.config.ts' : 'tailwind.config.js')
     )
 
-    // Add tailwindcss plugin if the configuration file exists, order is important
+    // Add tailwindcss plugin if tailwindcss configuration exists
     if (fs.existsSync(tailwindcssConfigPath)) {
-        plugins.push(
-            tailwindPlugin({
-                configPath: tailwindcssConfigPath,
-            })
-        )
+        postcssPlugins.push(tailwindcss({ config: tailwindcssConfigPath }))
     }
 
     // add sass, less, stylus plugins by order
     plugins.push(
+        lessLoader(config.css.less),
+        stylusLoader(config.css.stylus),
         sassPlugin({
             ...config.css.sass,
-            transform: postcssModules(config.css.cssModules ?? {}),
+            filter: /\.s?css$/,
+            transform: postcssModules(
+                {
+                    ...config.css.cssModules,
+                    globalModulePaths: [/(?<!\.module)\.s?css$/],
+                },
+                postcssPlugins
+            ),
+            type: 'css',
         }),
         lessLoader(config.css.less),
         stylusLoader(config.css.stylus)
