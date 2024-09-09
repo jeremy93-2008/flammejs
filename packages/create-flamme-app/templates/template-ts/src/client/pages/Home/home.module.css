@@ -1,0 +1,66 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #282c34;
+    color: white;
+    font-family: 'Roboto', sans-serif;
+}
+
+.flamme-title {
+    font-size: 24px;
+}
+
+.flamme-counter {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    font-size: 16px;
+    margin-top: 10px;
+    .flammeCounterText {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 12px;
+
+        span {
+            margin: 0 10px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+    }
+    button {
+        width: 125px;
+        border: solid 1px #5c697e;
+        border-radius: 8px;
+        background-color: #eee;
+        padding: 8px 16px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        &:hover {
+            background-color: #bbb;
+        }
+        &:focus {
+            outline: solid 2px #f3d17c;
+        }
+    }
+}
+
+.flamme-text {
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+.flamme-text-2 {
+    font-size: 14px;
+    margin-top: 6px;
+}
+
+.flamme-image {
+    width: 100px;
+    height: 100px;
+    margin-top: 20px;
+}
+
