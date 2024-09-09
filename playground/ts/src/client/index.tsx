@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
 import { FlammeAssets } from 'flamme/client'
+import { Outlet } from 'react-router-dom'
+
 // @ts-ignore
 import styles from './styles.module.css'
 import './styles.css'
@@ -11,7 +13,6 @@ import json from './file.json'
 
 // @ts-ignore
 import pikachu from './assets/pikachu.png'
-import { Outlet } from 'react-router-dom'
 
 export default function Index() {
     const [counter, setCounter] = useState(0)
