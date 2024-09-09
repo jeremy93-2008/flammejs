@@ -3,7 +3,10 @@ import path from 'node:path'
 import { getPublicEnv } from './env'
 import { WS_RELOAD_MESSAGE } from './hmr'
 import { useFlammeBuildMode } from '../hooks/useFlammeBuildMode'
+import * as fs from 'node:fs'
 interface ICreateFlammeEntrypoints {
+    directoryClientPath: string
+    directoryServerPath: string
     entrypointClientPath: string
     entrypointServerPath: string
     outPath: string
@@ -11,6 +14,7 @@ interface ICreateFlammeEntrypoints {
 }
 
 export async function createFlammeEntrypoints({
+    directoryClientPath,
     entrypointClientPath,
     entrypointServerPath,
     outPath,
@@ -37,33 +41,54 @@ export async function createFlammeEntrypoints({
             import React from 'react'
             import { hydrateRoot } from 'react-dom/client'
             import EntrypointClient from "${entrypointClientPath}"
+            import {
+                RouterProvider
+            } from 'react-router-dom'
             import "${defaultCssPath}"
             
-            function IndexApp() {
+            ${
+                fs.existsSync(path.resolve(directoryClientPath, 'routes.tsx'))
+                    ? `import getFlammeRouter from "${path.resolve(directoryClientPath, 'routes.tsx')}"`
+                    : fs.existsSync(
+                            path.resolve(directoryClientPath, 'routes.jsx')
+                        )
+                      ? `import getFlammeRouter from "${path.resolve(directoryClientPath, 'routes.jsx')}"`
+                      : 'const getFlammeRouter = async () => null'
+            }
+            
+            async function IndexApp() {
                 globalThis.assetsMap = ${assetsMap}
                 globalThis.process = {"env":  ${JSON.stringify(publicEnv)}}
                 
-                return React.createElement(EntrypointClient)
-            }
-            
-            hydrateRoot(document, React.createElement(IndexApp))
-            ${
-                mode === 'development'
-                    ? `
-                // Create WebSocket connection.
-                const socket = new WebSocket("ws://localhost:${config.hmrServerPort}/hmr");
+                const flammeRouter = await getFlammeRouter(event, React.createElement(EntrypointClient))
                 
-                // Listen for messages
-                socket.addEventListener("message", (event) => {
-                    if(event.data === "${WS_RELOAD_MESSAGE}") {
-                        socket.close()
-                        location.reload()
-                    }
-                });
-            `
-                    : ''
+                if(flammeRouter) {
+                    return () => React.createElement(RouterProvider, { router: flammeRouter.router },
+                                                 React.createElement(EntrypointClient)) 
+                }
+                
+                return () => React.createElement(EntrypointClient)
             }
             
+            IndexApp().then((component) => {
+                hydrateRoot(document, React.createElement(component))
+                ${
+                    mode === 'development'
+                        ? `
+                    // Create WebSocket connection.
+                    const socket = new WebSocket("ws://localhost:${config.hmrServerPort}/hmr");
+                    
+                    // Listen for messages
+                    socket.addEventListener("message", (event) => {
+                        if(event.data === "${WS_RELOAD_MESSAGE}") {
+                            socket.close()
+                            location.reload()
+                        }
+                    });
+                `
+                        : ''
+                }
+           }) 
         `
     }
 
@@ -78,22 +103,34 @@ export async function createFlammeEntrypoints({
         })
         return `
             import React from 'react'
-            import { hydrateRoot } from 'react-dom/client'
             import { renderToPipeableStream } from 'react-dom/server';
             import { createApp, createRouter, defineEventHandler, serveStatic, setResponseHeader } from 'h3'
             import * as fs from 'node:fs'
             import * as fsPromises from 'node:fs/promises'
             import * as mime from 'mime-types'
             import path from 'node:path'
+            import {
+                StaticRouterProvider
+            } from 'react-router-dom/server'
             import entrypointServer from "${entrypointServerPath}"
             import EntrypointClient from "${entrypointClientPath}"
             import "${defaultCssPath}"
+            
+             ${
+                 fs.existsSync(path.resolve(directoryClientPath, 'routes.tsx'))
+                     ? `import getFlammeRouter from "${path.resolve(directoryClientPath, 'routes.tsx')}"`
+                     : fs.existsSync(
+                             path.resolve(directoryClientPath, 'routes.jsx')
+                         )
+                       ? `import getFlammeRouter from "${path.resolve(directoryClientPath, 'routes.jsx')}"`
+                       : 'const getFlammeRouter = async () => null'
+             }
             
             globalThis.assetsMap = ${assetsMap}
             
             const app = createApp({ debug:true })
             
-            // Create a new router and register it in app
+            // Create a new server router and register it in app
             const router = createRouter()
             app.use(router)
             
@@ -151,10 +188,18 @@ export async function createFlammeEntrypoints({
             )
         
             //Register the client single entrypoint
-            app.use("${config.root || '/'}", defineEventHandler((event) => {
+            app.use("${config.root || '/'}", defineEventHandler(async (event) => {
                 process.env = ${JSON.stringify(globalThis.envPublic)}
+                                
+                const flammeRouter = await getFlammeRouter(event, React.createElement(EntrypointClient))
+                
+                const ClientComponent = flammeRouter ? 
+                    () => React.createElement(StaticRouterProvider, 
+                        { router: flammeRouter.router, context: flammeRouter.ctx }, 
+                    EntrypointClient) : EntrypointClient
+                
                 const { pipe } = renderToPipeableStream(
-                    React.createElement(EntrypointClient),
+                    React.createElement(ClientComponent),
                     {
                         onShellReady() {
                             setResponseHeader(event, 'content-type', 'text/html')
@@ -168,6 +213,7 @@ export async function createFlammeEntrypoints({
                         },
                     }
                 )
+                
                 return "Page loading..."
             }))
             

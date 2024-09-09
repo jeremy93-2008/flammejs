@@ -21,11 +21,16 @@ export async function createFlamme() {
     if (isTsConfigExists) {
         setBuildLoader('ts')
     }
+
+    const directoryServerPath = path.resolve(currentDirectory, config.serverDir)
+
     const entrypointServerPath = path.resolve(
         currentDirectory,
         config.serverDir,
         `index`
     )
+
+    const directoryClientPath = path.resolve(currentDirectory, config.clientDir)
 
     const entrypointClientPath = path.resolve(
         currentDirectory,
@@ -48,6 +53,8 @@ export async function createFlamme() {
 
     const { getEntryPointClientContent, getEntryPointServerContent } =
         await createFlammeEntrypoints({
+            directoryClientPath,
+            directoryServerPath,
             entrypointClientPath,
             entrypointServerPath,
             outPath,
