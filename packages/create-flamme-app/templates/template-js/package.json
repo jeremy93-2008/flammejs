@@ -1,6 +1,6 @@
 {
   "name": "flamme-template-js",
-  "version": "0.0.1-alpha.36",
+  "version": "0.0.1-alpha.37",
   "description": "A template for creating a new Flamme project using JavaScript.",
   "main": "index.js",
   "scripts": {
@@ -14,7 +14,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "flamme": "^0.0.1-alpha.36",
+    "flamme": "^0.0.1-alpha.37",
     "react-router-dom": "^6.26.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
