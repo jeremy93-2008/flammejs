@@ -9,7 +9,7 @@ import {
 import { buildEndpoint } from './build'
 import { listenServer } from './listen'
 import { formatShortDate } from '../utils/formatShortDate'
-import { serveAndListenHMRFlamme } from './hmr'
+import { serveAndListenHMRFlamme, WS_ERROR_MESSAGE } from './hmr'
 import { createFlamme } from './flamme'
 import { debounce } from '../utils/debounce'
 import { useFlammeBuildInputFiles } from '../hooks/useFlammeBuildInputFiles'
@@ -94,13 +94,17 @@ export async function watchAndListenFlamme(
                     buildServerPath: nextBuildServerPath(newHashKey),
                 })
 
-                if (error)
+                if (error) {
+                    hmr.clients.forEach((client) => {
+                        client.send(WS_ERROR_MESSAGE)
+                    })
                     return console.error(
                         formatShortDate(new Date()),
                         colors.red('[flamme]'),
                         colors.red('🚫'),
                         'Error building the app. Fix the error and save the file again. The server will reload automatically.'
                     )
+                }
 
                 listener = await listenServer({
                     buildServerPath: nextBuildServerPath(newHashKey),

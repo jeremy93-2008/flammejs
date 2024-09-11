@@ -13,6 +13,7 @@ export default defineFlammeConfig({
 
     devServerPort: 3000,
     hmrServerPort: 3001,
+    hmrOverlay: true,
 
     envPublicPrefix: 'PUBLIC_',
 

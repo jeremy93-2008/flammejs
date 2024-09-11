@@ -104,6 +104,7 @@ export default defineFlammeConfig({
     cacheDir: '.flamme',
     devServerPort: 3000,
     hmrServerPort: 3001,
+    hmrOverlay: true,
     envPublicPrefix: 'PUBLIC_',
     css: {
         cssModules: {

@@ -31,6 +31,9 @@ export interface IFlammeConfigFile {
     // hmr server port
     hmrServerPort?: number
 
+    // hmr overlay
+    hmrOverlay?: boolean
+
     // env public prefix
     envPublicPrefix?: string
 
@@ -86,6 +89,8 @@ export async function useFlammeConfig() {
 
             devServerPort: 3000,
             hmrServerPort: 3001,
+
+            hmrOverlay: true,
 
             envPublicPrefix: 'PUBLIC_',
 

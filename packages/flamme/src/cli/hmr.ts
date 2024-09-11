@@ -7,6 +7,7 @@ import colors from 'colors/safe'
 import { formatShortDate } from '../utils/formatShortDate'
 
 export const WS_RELOAD_MESSAGE = 'reload'
+export const WS_ERROR_MESSAGE = 'error'
 
 interface IServeHMROptions {
     currentDirectory: string
@@ -25,7 +26,7 @@ export function listenHMRFlamme({
 }: IServeHMROptions) {
     let isFistConnection = true
 
-    let listener = () => {}
+    let reloadListener = () => {}
 
     chokidar
         .watch(path.resolve(currentDirectory, config.cacheDir), {
@@ -36,14 +37,14 @@ export function listenHMRFlamme({
         })
         .on('add', async (path) => {
             if (path.match(/client\..+\.js$/gi)) {
-                return listener()
+                return reloadListener()
             }
         })
 
     return new WebSocketServer({
         port: config.hmrServerPort,
     }).on('connection', (ws) => {
-        let isMessageAlreadySent = false
+        let isRefreshMessageAlreadySent = false
         if (isFistConnection)
             console.log(
                 formatShortDate(new Date()),
@@ -54,9 +55,9 @@ export function listenHMRFlamme({
 
         isFistConnection = false
 
-        listener = () => {
-            if (isMessageAlreadySent) return
-            isMessageAlreadySent = true
+        reloadListener = () => {
+            if (isRefreshMessageAlreadySent) return
+            isRefreshMessageAlreadySent = true
             console.log(
                 formatShortDate(new Date()),
                 colors.red('[flamme]'),

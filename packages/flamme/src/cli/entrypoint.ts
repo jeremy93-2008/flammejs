@@ -1,7 +1,7 @@
 import { IFlammeConfigFile } from '../hooks/useFlammeConfig'
 import path from 'node:path'
 import { getPublicEnv } from './env'
-import { WS_RELOAD_MESSAGE } from './hmr'
+import { WS_ERROR_MESSAGE, WS_RELOAD_MESSAGE } from './hmr'
 import { useFlammeBuildMode } from '../hooks/useFlammeBuildMode'
 import * as fs from 'node:fs'
 interface ICreateFlammeEntrypoints {
@@ -82,7 +82,42 @@ export async function createFlammeEntrypoints({
                     socket.addEventListener("message", (event) => {
                         if(event.data === "${WS_RELOAD_MESSAGE}") {
                             socket.close()
+                            if(document.getElementById('flamme-error')) document.getElementById('flamme-error').remove()
                             location.reload()
+                        }
+                        if(event.data === "${WS_ERROR_MESSAGE}") {
+                            console.error("An error occurred while building the app")
+                            ${
+                                config.hmrOverlay
+                                    ? `const errorElement = document.createElement('div')
+                            errorElement.id = 'flamme-error'
+                            errorElement.style.position = 'fixed'
+                            errorElement.style.top = '0'
+                            errorElement.style.left = '0'
+                            errorElement.style.width = '100%'
+                            errorElement.style.height = '150px'
+                            errorElement.style.backgroundColor = 'rgb(248 113 113)'
+                            errorElement.style.color = 'white'
+                            errorElement.style.zIndex = '10000'
+                            errorElement.style.display = 'flex'
+                            errorElement.style.flexDirection = 'column'
+                            errorElement.style.justifyContent = 'center'
+                            errorElement.style.alignItems = 'center'
+                            
+                            const h1 = document.createElement('h1')
+                            h1.style.fontSize = '2rem'
+                            h1.innerHTML = 'An error occurred while building the app'
+                            errorElement.appendChild(h1)
+                            
+                            const p = document.createElement('p')
+                            p.style.fontSize = '1rem'
+                            p.innerHTML = 'Check flammejs console for more details. Fix the error and save the file again. The page will reload automatically.'
+                            errorElement.appendChild(p)
+                            
+                            document.body.appendChild(errorElement)`
+                                    : ''
+                            }
+                            
                         }
                     });
                 `
