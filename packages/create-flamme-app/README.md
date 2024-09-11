@@ -10,9 +10,14 @@ Flamme is a metaframework that leverages the power of the `h3` HTTP server and R
 
 - **H3 HTTP Server**: Utilizes the `h3` server for handling HTTP requests.
 - **React SSR**: Supports server-side rendering with React.
+- **React SSR Streaming**: Supports streaming server-side rendering with React (Suspense-ready).
 - **React Client**: Provides a robust client-side rendering experience with React.
 - **Hot Module Replacement (HMR)**: Enables fast development with HMR.
 - **TypeScript Support**: Fully supports TypeScript for type-safe development.
+- **CSS Modules**: Supports CSS Modules for styling.
+- **Sass, Less, Stylus**: Supports Sass, Less, and Stylus for styling.
+- **Tailwind CSS**: Supports Tailwind CSS for utility-first styling.
+- **React Router (data APIs)**: Integrates React Router for client-side routing - SSR-ready.
 
 ## Installation
 
@@ -71,6 +76,7 @@ my-new-app/
 ├── src/
 │   ├── client/
 │   │   ├── components/
+│   │   ├── routes.tsx
 │   │   └── index.tsx
 │   ├── server/
 │   │   ├── api/
