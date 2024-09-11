@@ -1,6 +1,6 @@
 {
   "name": "flamme-playground-vercel",
-  "version": "0.0.1-alpha.40",
+  "version": "0.0.1-alpha.41",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -16,8 +16,8 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "flamme": "^0.0.1-alpha.40",
-    "flamme-vercel": "^0.0.1-alpha.40",
+    "flamme": "^0.0.1-alpha.41",
+    "flamme-vercel": "^0.0.1-alpha.41",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
