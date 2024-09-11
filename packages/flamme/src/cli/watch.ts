@@ -11,6 +11,7 @@ import { listenServer } from './listen'
 import { formatShortDate } from '../utils/formatShortDate'
 import { serveAndListenHMRFlamme } from './hmr'
 import { createFlamme } from './flamme'
+import { debounce } from '../utils/debounce'
 
 interface IWatchAndListenFlammeParams {
     currentDirectory: string
@@ -76,28 +77,30 @@ export async function watchAndListenFlamme(
             hmr.options.port = nextConfig.hmrServerPort
         }
 
-        await listener.close()
+        debounce(async () => {
+            await listener.close()
 
-        // browser client build + server - ssr build
-        await buildEndpoint({
-            hashKey: newHashKey,
-            entryPointClientContent: await nextGetEntryPointClientContent({
+            // browser client build + server - ssr build
+            await buildEndpoint({
                 hashKey: newHashKey,
-            }),
-            entryPointServerContent: await nextGetEntryPointServerContent({
-                hashKey: newHashKey,
-            }),
-            buildClientPath: nextBuildClientPath(newHashKey),
-            buildServerPath: nextBuildServerPath(newHashKey),
-        })
+                entryPointClientContent: await nextGetEntryPointClientContent({
+                    hashKey: newHashKey,
+                }),
+                entryPointServerContent: await nextGetEntryPointServerContent({
+                    hashKey: newHashKey,
+                }),
+                buildClientPath: nextBuildClientPath(newHashKey),
+                buildServerPath: nextBuildServerPath(newHashKey),
+            })
 
-        listener = await listenServer({
-            buildServerPath: nextBuildServerPath(newHashKey),
-            port: nextConfig.devServerPort ?? port,
-            reload: true,
-            isProduction: params.isProduction,
-            isPublic: params.isPublic,
-            hasTunnel: params.hasTunnel,
+            listener = await listenServer({
+                buildServerPath: nextBuildServerPath(newHashKey),
+                port: nextConfig.devServerPort ?? port,
+                reload: true,
+                isProduction: params.isProduction,
+                isPublic: params.isPublic,
+                hasTunnel: params.hasTunnel,
+            })
         })
     })
 
