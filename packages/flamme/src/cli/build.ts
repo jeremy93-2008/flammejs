@@ -1,6 +1,7 @@
 import { build, type Loader, type Plugin } from 'esbuild'
 import path from 'node:path'
 import * as fs from 'node:fs'
+import * as fsExtra from 'fs-extra'
 import { rimraf } from 'rimraf'
 import { sassPlugin, postcssModules } from 'esbuild-sass-plugin'
 import { lessLoader } from 'esbuild-plugin-less'
@@ -17,6 +18,7 @@ import { IFlammeConfigFile, useFlammeConfig } from '../hooks/useFlammeConfig'
 import { useFlammeCacheDirEntries } from '../hooks/useFlammeCacheDirEntries'
 import { useFlammeBuildLoader } from '../hooks/useFlammeBuildLoader'
 import { useFlammeBuildInputFiles } from '../hooks/useFlammeBuildInputFiles'
+import * as os from 'node:os'
 
 export interface IBuildEndpointParams {
     hashKey: string
@@ -54,40 +56,84 @@ export async function buildEndpoint({
     // get build mode
     const [mode] = useFlammeBuildMode()
 
-    // clean build
-    if (mode === 'development') await cleanBuildEndpoint()
-
     const loader = getBuildLoader(config)
     const plugins = getBuildPlugins(currentDirectory, config)
 
-    // browser client build
-    const clientBuildResult = await buildClientEndpoint({
-        mode: mode ?? 'development',
-        entryPointContent: entryPointClientContent,
-        buildPath: buildClientPath,
-        loader,
-        plugins,
-    })
+    try {
+        // clean temp build
+        await cleanTempBuildEndpoint()
+        // We copy the cacheDir to tempDir, if something goes wrong we can restore the cacheDir
+        await saveTempBuildEndpoint()
+        // clean build
+        if (mode === 'development') await cleanBuildEndpoint()
 
-    // server + ssr build
-    const serverBuildResult = await buildServerEndpoint({
-        mode: mode ?? 'development',
-        entryPointContent: entryPointServerContent,
-        buildPath: buildServerPath,
-        loader,
-        plugins,
-    })
+        // browser client build
+        const clientBuildResult = await buildClientEndpoint({
+            mode: mode ?? 'development',
+            entryPointContent: entryPointClientContent,
+            buildPath: buildClientPath,
+            loader,
+            plugins,
+        })
 
-    // build manifest
-    await buildManifestEndpoint({
-        mode: mode ?? 'development',
-        hashKey,
-    })
+        // server + ssr build
+        const serverBuildResult = await buildServerEndpoint({
+            mode: mode ?? 'development',
+            entryPointContent: entryPointServerContent,
+            buildPath: buildServerPath,
+            loader,
+            plugins,
+        })
 
-    await saveBuildInputFilesToWatch({
-        ...clientBuildResult.metafile.inputs,
-        ...serverBuildResult.metafile.inputs,
-    })
+        // build manifest
+        await buildManifestEndpoint({
+            mode: mode ?? 'development',
+            hashKey,
+        })
+
+        await saveBuildInputFilesToWatch({
+            ...clientBuildResult.metafile.inputs,
+            ...serverBuildResult.metafile.inputs,
+        })
+
+        return { error: false }
+    } catch (error) {
+        console.error(error)
+        await restoreTempBuildEndpoint()
+        return { error: true }
+    }
+}
+
+export async function cleanTempBuildEndpoint() {
+    const [cacheDirEntries] = useFlammeCacheDirEntries()
+    for (const cacheDir of cacheDirEntries) {
+        fsExtra.rmSync(path.resolve(os.tmpdir(), cacheDir), {
+            recursive: true,
+            force: true,
+        })
+    }
+}
+
+export async function saveTempBuildEndpoint() {
+    const { currentDirectory } = await useFlammeCurrentDirectory()
+    const [cacheDirEntries] = useFlammeCacheDirEntries()
+    for (const cacheDir of cacheDirEntries) {
+        fsExtra.copySync(
+            path.resolve(currentDirectory, cacheDir),
+            path.resolve(os.tmpdir(), cacheDir)
+        )
+    }
+}
+
+export async function restoreTempBuildEndpoint() {
+    const { currentDirectory } = await useFlammeCurrentDirectory()
+    const [cacheDirEntries] = useFlammeCacheDirEntries()
+    for (const cacheDir of cacheDirEntries) {
+        fsExtra.copySync(
+            path.resolve(os.tmpdir(), cacheDir),
+            path.resolve(currentDirectory, cacheDir)
+        )
+    }
 }
 
 export async function cleanBuildEndpoint() {

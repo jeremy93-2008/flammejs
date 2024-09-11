@@ -22,7 +22,6 @@ export async function listenServer({
     qr?: boolean
     hasTunnel?: boolean
 }) {
-    // @ts-ignore
     const import_app = await import(buildServerPath)
 
     if (!reload && !isPublic && qr) {

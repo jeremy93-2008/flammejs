@@ -80,7 +80,7 @@ export async function watchAndListenFlamme(
                 await listener.close()
 
                 // browser client build + server - ssr build
-                await buildEndpoint({
+                const { error } = await buildEndpoint({
                     hashKey: newHashKey,
                     entryPointClientContent:
                         await nextGetEntryPointClientContent({
@@ -93,6 +93,14 @@ export async function watchAndListenFlamme(
                     buildClientPath: nextBuildClientPath(newHashKey),
                     buildServerPath: nextBuildServerPath(newHashKey),
                 })
+
+                if (error)
+                    return console.error(
+                        formatShortDate(new Date()),
+                        colors.red('[flamme]'),
+                        colors.red('🚫'),
+                        'Error building the app. Fix the error and save the file again. The server will reload automatically.'
+                    )
 
                 listener = await listenServer({
                     buildServerPath: nextBuildServerPath(newHashKey),
