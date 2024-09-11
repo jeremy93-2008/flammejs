@@ -7,15 +7,16 @@ import { lessLoader } from 'esbuild-plugin-less'
 // @ts-ignore
 import { stylusLoader } from 'esbuild-stylus-loader'
 import { copy } from 'esbuild-plugin-copy'
+import autoprefixer from 'autoprefixer'
 import tailwindcss from 'tailwindcss'
+import { AcceptedPlugin } from 'postcss'
 import { getEnv } from './env'
 import { useFlammeCurrentDirectory } from '../hooks/useFlammeCurrentDirectory'
 import { useFlammeBuildMode } from '../hooks/useFlammeBuildMode'
 import { IFlammeConfigFile, useFlammeConfig } from '../hooks/useFlammeConfig'
 import { useFlammeCacheDirEntries } from '../hooks/useFlammeCacheDirEntries'
 import { useFlammeBuildLoader } from '../hooks/useFlammeBuildLoader'
-import autoprefixer from 'autoprefixer'
-import { AcceptedPlugin } from 'postcss'
+import { useFlammeBuildInputFiles } from '../hooks/useFlammeBuildInputFiles'
 
 export interface IBuildEndpointParams {
     hashKey: string
@@ -60,7 +61,7 @@ export async function buildEndpoint({
     const plugins = getBuildPlugins(currentDirectory, config)
 
     // browser client build
-    await buildClientEndpoint({
+    const clientBuildResult = await buildClientEndpoint({
         mode: mode ?? 'development',
         entryPointContent: entryPointClientContent,
         buildPath: buildClientPath,
@@ -69,7 +70,7 @@ export async function buildEndpoint({
     })
 
     // server + ssr build
-    await buildServerEndpoint({
+    const serverBuildResult = await buildServerEndpoint({
         mode: mode ?? 'development',
         entryPointContent: entryPointServerContent,
         buildPath: buildServerPath,
@@ -82,6 +83,11 @@ export async function buildEndpoint({
         mode: mode ?? 'development',
         hashKey,
     })
+
+    await saveBuildInputFilesToWatch({
+        ...clientBuildResult.metafile.inputs,
+        ...serverBuildResult.metafile.inputs,
+    })
 }
 
 export async function cleanBuildEndpoint() {
@@ -92,6 +98,34 @@ export async function cleanBuildEndpoint() {
     for (const cacheDir of cacheDirEntries) {
         await rimraf.rimraf(path.resolve(currentDirectory, cacheDir))
     }
+}
+
+// We save the build input files to watch them on development mode
+async function saveBuildInputFilesToWatch(inputFiles: Record<string, any>) {
+    // get current directory
+    const { currentDirectory } = await useFlammeCurrentDirectory()
+
+    // get/set build inputs
+    const [_, setBuildInputFiles] = useFlammeBuildInputFiles()
+
+    // get inputs files to watch
+    const inputFilesToWatch = new Set(
+        Object.keys(inputFiles).map((input) => {
+            // we check if a plugin prefix exist on the file
+            if (input.includes(':')) {
+                // we split the input by the plugin prefix
+                const splitInput = input.split(':')
+                // we get the file from the split input - the last element
+                const file = splitInput[splitInput.length - 1]
+                // we resolve the file path
+                return path.resolve(currentDirectory, file)
+            }
+            return path.resolve(currentDirectory, input)
+        })
+    )
+
+    // set build input files
+    setBuildInputFiles([...inputFilesToWatch])
 }
 
 function getBuildPlugins(
@@ -221,6 +255,7 @@ export async function buildClientEndpoint({
         jsx: 'transform',
         platform: 'browser',
         format: 'esm',
+        metafile: true,
         treeShaking: true,
         allowOverwrite: true,
         logLevel: config.esbuild.loglevel,
@@ -258,6 +293,7 @@ export async function buildServerEndpoint({
         minify: mode === 'production',
         platform: 'node',
         format: 'cjs',
+        metafile: true,
         treeShaking: true,
         allowOverwrite: true,
         logLevel: config.esbuild.loglevel,

@@ -63,8 +63,6 @@ export default defineCommand({
         // watch and listen flamme
         await watchAndListenFlamme({
             currentDirectory,
-            getEntryPointClientContent,
-            getEntryPointServerContent,
             buildClientPath,
             buildServerPath,
             hashKey,

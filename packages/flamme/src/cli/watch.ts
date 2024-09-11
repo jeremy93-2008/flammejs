@@ -12,21 +12,12 @@ import { formatShortDate } from '../utils/formatShortDate'
 import { serveAndListenHMRFlamme } from './hmr'
 import { createFlamme } from './flamme'
 import { debounce } from '../utils/debounce'
+import { useFlammeBuildInputFiles } from '../hooks/useFlammeBuildInputFiles'
 
 interface IWatchAndListenFlammeParams {
     currentDirectory: string
     buildClientPath: (hash: string) => string
     buildServerPath: (hash: string) => string
-    getEntryPointClientContent: ({
-        hashKey,
-    }: {
-        hashKey: string
-    }) => Promise<string>
-    getEntryPointServerContent: ({
-        hashKey,
-    }: {
-        hashKey: string
-    }) => Promise<string>
     hashKey: string
     config: Required<IFlammeConfigFile>
     port: number
@@ -40,69 +31,81 @@ interface IWatchAndListenFlammeParams {
 export async function watchAndListenFlamme(
     params: IWatchAndListenFlammeParams
 ) {
-    const { currentDirectory, buildServerPath, hashKey, config, port } = params
+    const { buildServerPath, hashKey, config, port } = params
     let listener: Listener
+
+    // get build input files to watch
+    const [buildInputFiles] = useFlammeBuildInputFiles()
 
     // hmr server
     const hmr = await serveAndListenHMRFlamme()
 
-    chokidar.watch(currentDirectory).on('change', async (pathname, stats) => {
-        if (pathname.includes(config.buildDir)) return
-        if (!pathname.includes('/src') && !pathname.includes('flamme.config'))
-            return
-
-        const {
-            hashKey: newHashKey,
-            buildClientPath: nextBuildClientPath,
-            buildServerPath: nextBuildServerPath,
-            getEntryPointClientContent: nextGetEntryPointClientContent,
-            getEntryPointServerContent: nextGetEntryPointServerContent,
-        } = await createFlamme()
-        const { config: nextConfig } = await useFlammeConfig()
-
-        if (!pathname.includes('flamme.config')) {
-            console.log(
-                formatShortDate(new Date()),
-                colors.red('[flamme]'),
-                '📄 File changed:',
-                colors.green(path.relative(process.cwd(), pathname))
+    const watcher = chokidar
+        .watch(buildInputFiles)
+        .on('change', async (pathname, stats) => {
+            if (pathname.includes(config.buildDir)) return
+            if (
+                !pathname.includes('/src') &&
+                !pathname.includes('flamme.config')
             )
-        } else {
-            console.log(
-                formatShortDate(new Date()),
-                colors.red('[flamme]'),
-                '⚙️ Configuration changed:',
-                colors.green(path.relative(process.cwd(), pathname))
-            )
-            hmr.options.port = nextConfig.hmrServerPort
-        }
+                return
 
-        debounce(async () => {
-            await listener.close()
-
-            // browser client build + server - ssr build
-            await buildEndpoint({
+            const {
                 hashKey: newHashKey,
-                entryPointClientContent: await nextGetEntryPointClientContent({
-                    hashKey: newHashKey,
-                }),
-                entryPointServerContent: await nextGetEntryPointServerContent({
-                    hashKey: newHashKey,
-                }),
-                buildClientPath: nextBuildClientPath(newHashKey),
-                buildServerPath: nextBuildServerPath(newHashKey),
-            })
+                buildClientPath: nextBuildClientPath,
+                buildServerPath: nextBuildServerPath,
+                getEntryPointClientContent: nextGetEntryPointClientContent,
+                getEntryPointServerContent: nextGetEntryPointServerContent,
+            } = await createFlamme()
+            const { config: nextConfig } = await useFlammeConfig()
 
-            listener = await listenServer({
-                buildServerPath: nextBuildServerPath(newHashKey),
-                port: nextConfig.devServerPort ?? port,
-                reload: true,
-                isProduction: params.isProduction,
-                isPublic: params.isPublic,
-                hasTunnel: params.hasTunnel,
+            if (!pathname.includes('flamme.config')) {
+                console.log(
+                    formatShortDate(new Date()),
+                    colors.red('[flamme]'),
+                    '📄 File changed:',
+                    colors.green(path.relative(process.cwd(), pathname))
+                )
+            } else {
+                console.log(
+                    formatShortDate(new Date()),
+                    colors.red('[flamme]'),
+                    '⚙️ Configuration changed:',
+                    colors.green(path.relative(process.cwd(), pathname))
+                )
+                hmr.options.port = nextConfig.hmrServerPort
+            }
+
+            debounce(async () => {
+                await listener.close()
+
+                // browser client build + server - ssr build
+                await buildEndpoint({
+                    hashKey: newHashKey,
+                    entryPointClientContent:
+                        await nextGetEntryPointClientContent({
+                            hashKey: newHashKey,
+                        }),
+                    entryPointServerContent:
+                        await nextGetEntryPointServerContent({
+                            hashKey: newHashKey,
+                        }),
+                    buildClientPath: nextBuildClientPath(newHashKey),
+                    buildServerPath: nextBuildServerPath(newHashKey),
+                })
+
+                listener = await listenServer({
+                    buildServerPath: nextBuildServerPath(newHashKey),
+                    port: nextConfig.devServerPort ?? port,
+                    reload: true,
+                    isProduction: params.isProduction,
+                    isPublic: params.isPublic,
+                    hasTunnel: params.hasTunnel,
+                })
+
+                await refreshWatchingFiles(watcher)
             })
         })
-    })
 
     listener = await listenServer({
         buildServerPath: buildServerPath(hashKey),
@@ -121,4 +124,17 @@ export async function watchAndListenFlamme(
         colors.green('/src'),
         'for files changes...'
     )
+}
+
+export async function refreshWatchingFiles(watcher: chokidar.FSWatcher) {
+    // get watched files
+    const watchedFiles = Object.entries(watcher.getWatched())
+        .map(([dir, files]) => {
+            return files.map((file) => path.join(dir, file))
+        })
+        .flat()
+    // unwatch previous files and watch new files
+    watcher.unwatch(watchedFiles)
+    const [newBuildInputFiles] = useFlammeBuildInputFiles()
+    watcher.add(newBuildInputFiles)
 }
