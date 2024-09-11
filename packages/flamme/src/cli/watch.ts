@@ -13,6 +13,7 @@ import { serveAndListenHMRFlamme, WS_ERROR_MESSAGE } from './hmr'
 import { createFlamme } from './flamme'
 import { debounce } from '../utils/debounce'
 import { useFlammeBuildInputFiles } from '../hooks/useFlammeBuildInputFiles'
+import { useFlammeCurrentDirectory } from '../hooks/useFlammeCurrentDirectory'
 
 interface IWatchAndListenFlammeParams {
     currentDirectory: string
@@ -34,6 +35,11 @@ export async function watchAndListenFlamme(
     const { buildServerPath, hashKey, config, port } = params
     let listener: Listener
 
+    const { currentDirectory } = await useFlammeCurrentDirectory()
+
+    // c12 - flamme config - get metadata
+    const c12 = await useFlammeConfig()
+
     // get build input files to watch
     const [buildInputFiles] = useFlammeBuildInputFiles()
 
@@ -41,7 +47,10 @@ export async function watchAndListenFlamme(
     const hmr = await serveAndListenHMRFlamme()
 
     const watcher = chokidar
-        .watch(buildInputFiles)
+        .watch([
+            path.resolve(currentDirectory, c12.configFile ?? ''),
+            ...buildInputFiles,
+        ])
         .on('change', async (pathname, stats) => {
             if (pathname.includes(config.buildDir)) return
             if (
@@ -139,14 +148,24 @@ export async function watchAndListenFlamme(
 }
 
 export async function refreshWatchingFiles(watcher: chokidar.FSWatcher) {
+    const { currentDirectory } = await useFlammeCurrentDirectory()
+
+    // c12 - flamme config - get metadata
+    const c12 = await useFlammeConfig()
+
     // get watched files
     const watchedFiles = Object.entries(watcher.getWatched())
         .map(([dir, files]) => {
             return files.map((file) => path.join(dir, file))
         })
         .flat()
+
     // unwatch previous files and watch new files
     watcher.unwatch(watchedFiles)
     const [newBuildInputFiles] = useFlammeBuildInputFiles()
-    watcher.add(newBuildInputFiles)
+
+    watcher.add([
+        path.resolve(currentDirectory, c12.configFile ?? ''),
+        ...newBuildInputFiles,
+    ])
 }
