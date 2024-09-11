@@ -1,6 +1,6 @@
 {
   "name": "flamme-vercel",
-  "version": "0.0.1-alpha.42",
+  "version": "0.0.1-alpha.43",
   "description": "A package to deploy your Flamme app to Vercel",
   "bin": {
     "flamme-vercel": "dist/index.js"
