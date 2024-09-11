@@ -107,10 +107,12 @@ export async function buildEndpoint({
 export async function cleanTempBuildEndpoint() {
     const [cacheDirEntries] = useFlammeCacheDirEntries()
     for (const cacheDir of cacheDirEntries) {
-        fsExtra.rmSync(path.resolve(os.tmpdir(), cacheDir), {
-            recursive: true,
-            force: true,
-        })
+        if (fs.existsSync(path.resolve(os.tmpdir(), cacheDir))) {
+            fsExtra.rmSync(path.resolve(os.tmpdir(), cacheDir), {
+                recursive: true,
+                force: true,
+            })
+        }
     }
 }
 
@@ -118,10 +120,12 @@ export async function saveTempBuildEndpoint() {
     const { currentDirectory } = await useFlammeCurrentDirectory()
     const [cacheDirEntries] = useFlammeCacheDirEntries()
     for (const cacheDir of cacheDirEntries) {
-        fsExtra.copySync(
-            path.resolve(currentDirectory, cacheDir),
-            path.resolve(os.tmpdir(), cacheDir)
-        )
+        if (fs.existsSync(path.resolve(currentDirectory, cacheDir))) {
+            fsExtra.copySync(
+                path.resolve(currentDirectory, cacheDir),
+                path.resolve(os.tmpdir(), cacheDir)
+            )
+        }
     }
 }
 
@@ -129,10 +133,12 @@ export async function restoreTempBuildEndpoint() {
     const { currentDirectory } = await useFlammeCurrentDirectory()
     const [cacheDirEntries] = useFlammeCacheDirEntries()
     for (const cacheDir of cacheDirEntries) {
-        fsExtra.copySync(
-            path.resolve(os.tmpdir(), cacheDir),
-            path.resolve(currentDirectory, cacheDir)
-        )
+        if (fs.existsSync(path.resolve(os.tmpdir(), cacheDir))) {
+            fsExtra.copySync(
+                path.resolve(os.tmpdir(), cacheDir),
+                path.resolve(currentDirectory, cacheDir)
+            )
+        }
     }
 }
 
@@ -142,7 +148,9 @@ export async function cleanBuildEndpoint() {
 
     // clean all cache directories
     for (const cacheDir of cacheDirEntries) {
-        await rimraf.rimraf(path.resolve(currentDirectory, cacheDir))
+        if (fs.existsSync(path.resolve(currentDirectory, cacheDir))) {
+            await rimraf.rimraf(path.resolve(currentDirectory, cacheDir))
+        }
     }
 }
 

@@ -10,7 +10,7 @@ export default defineCommand({
     meta: {
         name: 'dev',
         description: 'Start the development server',
-        version: '0.0.1-alpha.43',
+        version: '0.0.1-alpha.44',
     },
     args: {
         open: {

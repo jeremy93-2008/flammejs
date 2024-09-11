@@ -13,7 +13,7 @@ export default defineCommand({
     meta: {
         name: 'build',
         description: 'Build the app',
-        version: '0.0.1-alpha.43',
+        version: '0.0.1-alpha.44',
     },
     args,
     run: async ({ args }) => {
