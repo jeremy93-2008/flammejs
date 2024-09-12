@@ -351,6 +351,7 @@ export async function buildServerEndpoint({
         treeShaking: true,
         allowOverwrite: true,
         logLevel: config.esbuild.loglevel,
+        external: ['esbuild', 'lightningcss', 'fsevents'],
         loader,
         plugins,
     })

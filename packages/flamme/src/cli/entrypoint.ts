@@ -12,6 +12,7 @@ interface ICreateFlammeEntrypoints {
     outPath: string
     config: IFlammeConfigFile
 }
+import { useFlammeBuildLoader } from '../hooks/useFlammeBuildLoader'
 
 export async function createFlammeEntrypoints({
     directoryClientPath,
@@ -20,7 +21,9 @@ export async function createFlammeEntrypoints({
     outPath,
     config,
 }: ICreateFlammeEntrypoints) {
+    const [loader] = useFlammeBuildLoader()
     const [mode] = useFlammeBuildMode()
+
     const defaultCssPath = path.resolve(
         __dirname,
         '../../src/core/styles/default.css'
@@ -163,11 +166,40 @@ export async function createFlammeEntrypoints({
             
             globalThis.assetsMap = ${assetsMap}
             
-            const app = createApp({ debug:true })
+            const app = createApp({ debug: ${mode === 'development' ? 'true' : 'false'} })
             
             // Create a new server router and register it in app
             const router = createRouter()
             app.use(router)
+            
+            ${
+                mode === 'development'
+                    ? `
+            // Create Vite Server
+            import { createServer as createViteServer } from 'vite'
+            
+            const vite = createViteServer({
+                server: { middlewareMode: true, origin: 'http://localhost:${config.devServerPort}' },
+                appType: 'custom',
+                configFile: false,
+                build: {
+                    manifest: true,
+                    rollupOptions: {
+                        input: '${entrypointClientPath}.${loader}x',
+                    },
+                },
+            })
+            
+            vite.then(server => {
+                app.use(defineEventHandler(async (event) => {
+                    return vite.middlewares(event.node.req, event.node.res, () => null)
+                }))            
+            })
+            
+            `
+                    : ''
+            }
+            
             
             // Register custom values for context
             app.use(defineEventHandler((event) => {
