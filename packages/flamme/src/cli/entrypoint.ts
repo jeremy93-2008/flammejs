@@ -35,7 +35,7 @@ export async function createFlammeEntrypoints({
         hashKey: string
     }) => {
         const assetsMap = JSON.stringify({
-            'client.js': `${config.base}client.${hashKey}.js`,
+            'client.js': `${config.base}client.${hashKey}.mjs`,
             'client.css': `${config.base}client.${hashKey}.css`,
         })
         const publicEnv = await getPublicEnv()
@@ -136,7 +136,7 @@ export async function createFlammeEntrypoints({
         hashKey: string
     }) => {
         const assetsMap = JSON.stringify({
-            'client.js': `${config.base}client.${hashKey}.js`,
+            'client.js': `${config.base}client.${hashKey}.mjs`,
             'client.css': `${config.base}client.${hashKey}.css`,
         })
         return `
@@ -149,7 +149,7 @@ export async function createFlammeEntrypoints({
             import path from 'node:path'
             import {
                 StaticRouterProvider
-            } from 'react-router-dom/server'
+            } from 'react-router-dom/server.js'
             import entrypointServer from "${entrypointServerPath}"
             import EntrypointClient from "${entrypointClientPath}"
             import "${defaultCssPath}"
@@ -171,35 +171,6 @@ export async function createFlammeEntrypoints({
             // Create a new server router and register it in app
             const router = createRouter()
             app.use(router)
-            
-            ${
-                mode === 'development'
-                    ? `
-            // Create Vite Server
-            import { createServer as createViteServer } from 'vite'
-            
-            const vite = createViteServer({
-                server: { middlewareMode: true, origin: 'http://localhost:${config.devServerPort}' },
-                appType: 'custom',
-                configFile: false,
-                build: {
-                    manifest: true,
-                    rollupOptions: {
-                        input: '${entrypointClientPath}.${loader}x',
-                    },
-                },
-            })
-            
-            vite.then(server => {
-                app.use(defineEventHandler(async (event) => {
-                    return vite.middlewares(event.node.req, event.node.res, () => null)
-                }))            
-            })
-            
-            `
-                    : ''
-            }
-            
             
             // Register custom values for context
             app.use(defineEventHandler((event) => {

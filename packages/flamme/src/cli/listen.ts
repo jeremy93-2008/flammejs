@@ -30,7 +30,7 @@ export async function listenServer({
         )
     }
 
-    const listener = await listen(toNodeListener(import_app.default.default), {
+    const listener = await listen(toNodeListener(import_app.default), {
         port,
         _entry: buildServerPath,
         showURL: !reload, // show url only if it's the first time

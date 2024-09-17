@@ -13,7 +13,7 @@ export function FlammeAssets(props: IFlammeAssetsProps) {
         <>
             {!noScript && (
                 <script
-                    type="text/javascript"
+                    type="module"
                     src={assetsMap['client.js']}
                     defer
                 ></script>
