@@ -20,7 +20,7 @@ import { useFlammeBuildLoader } from '../hooks/useFlammeBuildLoader'
 import { useFlammeBuildInputFiles } from '../hooks/useFlammeBuildInputFiles'
 import * as os from 'node:os'
 import { sync as resolveSync } from 'resolve'
-import { mkdirpSync } from 'fs-extra'
+import { resolveDirModule } from './utils/resolveDirModule'
 
 export interface IBuildEndpointParams {
     hashKey: string
@@ -30,19 +30,11 @@ export interface IBuildEndpointParams {
     buildServerPath: string
 }
 
-export interface ISingleClientBuildEndpointParams {
+export interface ISingleBuildEndpointParams {
     mode: 'production' | 'development'
     entryPointContent: string
     buildPath: string
     alias: Record<string, string>
-    plugins: Plugin[]
-    loader: Record<string, Loader>
-}
-
-export interface ISingleServerBuildEndpointParams {
-    mode: 'production' | 'development'
-    entryPointContent: string
-    buildPath: string
     plugins: Plugin[]
     loader: Record<string, Loader>
 }
@@ -71,7 +63,11 @@ export async function buildEndpoint({
     const aliasExternals = await createAliasExternals()
 
     const loader = getBuildLoader(config)
-    const plugins = getBuildPlugins(currentDirectory, aliasExternals, config)
+    const plugins = getBuildPlugins(
+        currentDirectory,
+        { ...aliasExternals.server, ...aliasExternals.client },
+        config
+    )
 
     try {
         // clean temp build
@@ -86,7 +82,7 @@ export async function buildEndpoint({
             mode: mode ?? 'development',
             entryPointContent: entryPointClientContent,
             buildPath: buildClientPath,
-            alias: aliasExternals,
+            alias: aliasExternals.client,
             loader,
             plugins,
         })
@@ -96,6 +92,7 @@ export async function buildEndpoint({
             mode: mode ?? 'development',
             entryPointContent: entryPointServerContent,
             buildPath: buildServerPath,
+            alias: aliasExternals.server,
             loader,
             plugins,
         })
@@ -197,28 +194,25 @@ async function saveBuildInputFilesToWatch(inputFiles: Record<string, any>) {
     setBuildInputFiles([...inputFilesToWatch])
 }
 
-async function createAliasExternals() {
+async function createAliasExternals(): Promise<{
+    server: Record<string, string>
+    client: Record<string, string>
+}> {
     //get mode
     const [mode] = useFlammeBuildMode()
+    if (mode === 'production') return { server: {}, client: {} }
     return {
-        react:
-            mode === 'development'
-                ? '/node_modules/react/cjs/react.development.js'
-                : '/node_modules/react/cjs/react.production.min.js',
-        'react-dom':
-            mode === 'development'
-                ? '/node_modules/react-dom/cjs/react-dom.development.js'
-                : '/node_modules/react-dom/cjs/react-dom.production.min.js',
-        'react-dom/client':
-            mode === 'development'
-                ? '/node_modules/react-dom/cjs/react-dom.development.js'
-                : '/node_modules/react-dom/cjs/react-dom.production.min.js',
-        'react-router-dom/server.js':
-            '/node_modules/react-router-dom/server.js',
-        'react-router-dom':
-            mode === 'development'
-                ? '/node_modules/react-router-dom/dist/react-router-dom.development.js'
-                : '/node_modules/react-router-dom/dist/react-router-dom.production.min.js',
+        server: {},
+        client: {
+            react: '/node_modules/react/cjs/react.development.js',
+            'react-dom': '/node_modules/react-dom/cjs/react-dom.development.js',
+            'react-dom/client':
+                '/node_modules/react-dom/cjs/react-dom.development.js',
+            'react-dom/server':
+                '/node_modules/react-dom/cjs/react-dom-server.browser.development.js',
+            'react-router-dom/server':
+                '/node_modules/react-router-dom/server/server.js',
+        },
     }
 }
 
@@ -296,6 +290,27 @@ function getBuildPlugins(
 
     // Add alias modules files by copying them to the cache/build directory
     for (const [key, value] of Object.entries(alias)) {
+        // Check if the module exists
+        if (
+            fsExtra.existsSync(
+                path.resolve(
+                    currentDirectory,
+                    mode === 'development' ? config.cacheDir : config.buildDir,
+                    'node_modules',
+                    key
+                )
+            )
+        ) {
+            fsExtra.rmSync(
+                path.resolve(
+                    currentDirectory,
+                    mode === 'development' ? config.cacheDir : config.buildDir,
+                    'node_modules',
+                    key
+                ),
+                { recursive: true }
+            )
+        }
         fsExtra.mkdirpSync(
             path.resolve(
                 currentDirectory,
@@ -304,16 +319,13 @@ function getBuildPlugins(
                 key
             )
         )
-        console.log(resolveSync(key))
+
         plugins.push(
             copy({
                 watch: mode === 'development',
                 assets: [
                     {
-                        from: resolveSync(key)
-                            .split('/')
-                            .slice(0, -1)
-                            .join('/'),
+                        from: path.resolve(resolveDirModule(key), '**', '*'),
                         to: path.resolve(
                             currentDirectory,
                             mode === 'development'
@@ -324,7 +336,6 @@ function getBuildPlugins(
                         ),
                     },
                 ],
-                verbose: true,
             })
         )
     }
@@ -363,7 +374,7 @@ export async function buildClientEndpoint({
     alias,
     plugins,
     loader,
-}: ISingleClientBuildEndpointParams) {
+}: ISingleBuildEndpointParams) {
     const { currentDirectory } = await useFlammeCurrentDirectory()
     const { config } = await useFlammeConfig()
 
@@ -405,9 +416,10 @@ export async function buildServerEndpoint({
     mode,
     entryPointContent,
     buildPath,
+    alias,
     plugins,
     loader,
-}: ISingleServerBuildEndpointParams) {
+}: ISingleBuildEndpointParams) {
     const { currentDirectory } = await useFlammeCurrentDirectory()
     const { config } = await useFlammeConfig()
 
@@ -415,7 +427,7 @@ export async function buildServerEndpoint({
         stdin: {
             contents: entryPointContent,
             resolveDir: currentDirectory,
-            sourcefile: 'server.mts',
+            sourcefile: 'server.ts',
             loader: 'tsx',
         },
         absWorkingDir: currentDirectory,
@@ -429,12 +441,17 @@ export async function buildServerEndpoint({
         sourcemap: mode === 'development',
         minify: mode === 'production',
         platform: 'node',
-        format: 'esm',
+        format: 'cjs',
         metafile: true,
         treeShaking: true,
         allowOverwrite: true,
         logLevel: config.esbuild.loglevel,
-        external: ['react', 'react-dom', 'react-router-dom', 'mime-types'],
+        alias,
+        external: [
+            ...Object.entries(alias)
+                .map(([key, value]) => [key, value])
+                .flat(),
+        ],
         loader,
         plugins,
     })

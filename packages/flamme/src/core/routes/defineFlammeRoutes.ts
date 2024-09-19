@@ -5,7 +5,7 @@ import {
     createStaticHandler,
     createStaticRouter,
     type StaticHandlerContext,
-} from 'react-router-dom/server.js'
+} from 'react-router-dom/server'
 import { createBrowserRouter, type RouteObject } from 'react-router-dom'
 
 import { isSSR } from '../client/isSSR'

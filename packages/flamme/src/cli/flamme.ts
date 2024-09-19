@@ -49,7 +49,7 @@ export async function createFlamme() {
         path.resolve(outPath, hash ? `client.${hash}.mjs` : 'client.mjs')
 
     const buildServerPath = (hash?: string) =>
-        path.resolve(outPath, hash ? `server.${hash}.mjs` : 'server.mjs')
+        path.resolve(outPath, hash ? `server.${hash}.js` : 'server.js')
 
     const { getEntryPointClientContent, getEntryPointServerContent } =
         await createFlammeEntrypoints({
