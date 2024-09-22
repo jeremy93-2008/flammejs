@@ -2,6 +2,7 @@ import { build, type Loader, type Plugin } from 'esbuild'
 import path from 'node:path'
 import * as fs from 'node:fs'
 import * as fsExtra from 'fs-extra'
+import * as os from 'node:os'
 import { rimraf } from 'rimraf'
 import { sassPlugin, postcssModules } from 'esbuild-sass-plugin'
 import { lessLoader } from 'esbuild-plugin-less'
@@ -18,8 +19,6 @@ import { IFlammeConfigFile, useFlammeConfig } from '../hooks/useFlammeConfig'
 import { useFlammeCacheDirEntries } from '../hooks/useFlammeCacheDirEntries'
 import { useFlammeBuildLoader } from '../hooks/useFlammeBuildLoader'
 import { useFlammeBuildInputFiles } from '../hooks/useFlammeBuildInputFiles'
-import * as os from 'node:os'
-import { sync as resolveSync } from 'resolve'
 import { resolveDirModule } from './utils/resolveDirModule'
 
 export interface IBuildEndpointParams {
@@ -202,7 +201,12 @@ async function createAliasExternals(): Promise<{
     const [mode] = useFlammeBuildMode()
     if (mode === 'production') return { server: {}, client: {} }
     return {
-        server: {},
+        server: {
+            react: 'react',
+            'react-dom': 'react-dom',
+            'react-router-dom': 'react-router-dom',
+            'react-router': 'react-router',
+        },
         client: {
             react: '/node_modules/react/cjs/react.development.js',
             'react-dom': '/node_modules/react-dom/cjs/react-dom.development.js',
@@ -212,6 +216,7 @@ async function createAliasExternals(): Promise<{
                 '/node_modules/react-dom/cjs/react-dom-server.browser.development.js',
             'react-router-dom/server':
                 '/node_modules/react-router-dom/server/server.js',
+            'react-router-dom': '/node_modules/react-router-dom/dist/index.js',
         },
     }
 }
@@ -258,9 +263,7 @@ function getBuildPlugins(
                 postcssPlugins
             ),
             type: 'css',
-        }),
-        lessLoader(config.css.less),
-        stylusLoader(config.css.stylus)
+        })
     )
 
     // Add public folder copy plugin if exists
@@ -290,35 +293,18 @@ function getBuildPlugins(
 
     // Add alias modules files by copying them to the cache/build directory
     for (const [key, value] of Object.entries(alias)) {
-        // Check if the module exists
-        if (
-            fsExtra.existsSync(
-                path.resolve(
-                    currentDirectory,
-                    mode === 'development' ? config.cacheDir : config.buildDir,
-                    'node_modules',
-                    key
-                )
-            )
-        ) {
-            fsExtra.rmSync(
-                path.resolve(
-                    currentDirectory,
-                    mode === 'development' ? config.cacheDir : config.buildDir,
-                    'node_modules',
-                    key
-                ),
-                { recursive: true }
-            )
-        }
-        fsExtra.mkdirpSync(
-            path.resolve(
-                currentDirectory,
-                mode === 'development' ? config.cacheDir : config.buildDir,
-                'node_modules',
-                key
-            )
+        const destinationDir = path.resolve(
+            currentDirectory,
+            mode === 'development' ? config.cacheDir : config.buildDir,
+            'node_modules',
+            key
         )
+
+        // Check if the module exists
+        if (fsExtra.existsSync(destinationDir)) {
+            fsExtra.rmSync(destinationDir, { recursive: true })
+        }
+        fsExtra.mkdirpSync(destinationDir)
 
         plugins.push(
             copy({
