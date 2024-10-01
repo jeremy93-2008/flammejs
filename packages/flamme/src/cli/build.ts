@@ -20,6 +20,7 @@ import { useFlammeCacheDirEntries } from '../hooks/useFlammeCacheDirEntries'
 import { useFlammeBuildLoader } from '../hooks/useFlammeBuildLoader'
 import { useFlammeBuildInputFiles } from '../hooks/useFlammeBuildInputFiles'
 import { resolveDirModule } from './utils/resolveDirModule'
+import { esbuildPluginManualChunkBrowser } from './plugins/esbuild-plugin-manual-chunk-browser'
 
 export interface IBuildEndpointParams {
     hashKey: string
@@ -33,7 +34,9 @@ export interface ISingleBuildEndpointParams {
     mode: 'production' | 'development'
     entryPointContent: string
     buildPath: string
-    alias: Record<string, string>
+    hashKey?: string
+    alias?: Record<string, string>
+    manualChunks?: Record<string, string>
     plugins: Plugin[]
     loader: Record<string, Loader>
 }
@@ -62,11 +65,7 @@ export async function buildEndpoint({
     const aliasExternals = await createAliasExternals()
 
     const loader = getBuildLoader(config)
-    const plugins = getBuildPlugins(
-        currentDirectory,
-        { ...aliasExternals.server, ...aliasExternals.client },
-        config
-    )
+    const plugins = getBuildPlugins(currentDirectory, config)
 
     try {
         // clean temp build
@@ -81,7 +80,8 @@ export async function buildEndpoint({
             mode: mode ?? 'development',
             entryPointContent: entryPointClientContent,
             buildPath: buildClientPath,
-            alias: aliasExternals.client,
+            manualChunks: aliasExternals.client,
+            hashKey,
             loader,
             plugins,
         })
@@ -92,6 +92,7 @@ export async function buildEndpoint({
             entryPointContent: entryPointServerContent,
             buildPath: buildServerPath,
             alias: aliasExternals.server,
+            hashKey,
             loader,
             plugins,
         })
@@ -208,22 +209,20 @@ async function createAliasExternals(): Promise<{
             'react-router': 'react-router',
         },
         client: {
-            react: '/node_modules/react/cjs/react.development.js',
-            'react-dom': '/node_modules/react-dom/cjs/react-dom.development.js',
-            'react-dom/client':
-                '/node_modules/react-dom/cjs/react-dom.development.js',
-            'react-dom/server':
-                '/node_modules/react-dom/cjs/react-dom-server.browser.development.js',
-            'react-router-dom/server':
-                '/node_modules/react-router-dom/server/server.js',
-            'react-router-dom': '/node_modules/react-router-dom/dist/index.js',
+            react: 'react',
+            'react-dom': 'react-dom',
+            'react-router-dom': 'react-router-dom',
+            'react-router': 'react-router',
+            scheduler: 'scheduler',
+            '@remix-run/router': '@remix-run/router',
+            h3: 'h3',
+            defu: 'defu',
         },
     }
 }
 
 function getBuildPlugins(
     currentDirectory: string,
-    alias: Record<string, string>,
     config: Required<IFlammeConfigFile>
 ) {
     const [mode] = useFlammeBuildMode()
@@ -291,41 +290,6 @@ function getBuildPlugins(
         )
     }
 
-    // Add alias modules files by copying them to the cache/build directory
-    for (const [key, value] of Object.entries(alias)) {
-        const destinationDir = path.resolve(
-            currentDirectory,
-            mode === 'development' ? config.cacheDir : config.buildDir,
-            'node_modules',
-            key
-        )
-
-        // Check if the module exists
-        if (fsExtra.existsSync(destinationDir)) {
-            fsExtra.rmSync(destinationDir, { recursive: true })
-        }
-        fsExtra.mkdirpSync(destinationDir)
-
-        plugins.push(
-            copy({
-                watch: mode === 'development',
-                assets: [
-                    {
-                        from: path.resolve(resolveDirModule(key), '**', '*'),
-                        to: path.resolve(
-                            currentDirectory,
-                            mode === 'development'
-                                ? config.cacheDir
-                                : config.buildDir,
-                            'node_modules',
-                            key
-                        ),
-                    },
-                ],
-            })
-        )
-    }
-
     return [...plugins, ...config.esbuild.plugins]
 }
 
@@ -357,7 +321,8 @@ export async function buildClientEndpoint({
     mode,
     entryPointContent,
     buildPath,
-    alias,
+    hashKey,
+    manualChunks,
     plugins,
     loader,
 }: ISingleBuildEndpointParams) {
@@ -368,7 +333,7 @@ export async function buildClientEndpoint({
         stdin: {
             contents: entryPointContent,
             resolveDir: currentDirectory,
-            sourcefile: 'client.ts',
+            sourcefile: `client.${hashKey}.mts`,
             loader: 'tsx',
         },
         absWorkingDir: currentDirectory,
@@ -387,14 +352,14 @@ export async function buildClientEndpoint({
         treeShaking: true,
         allowOverwrite: true,
         logLevel: config.esbuild.loglevel,
-        alias,
-        external: [
-            ...Object.entries(alias)
-                .map(([key, value]) => [key, value])
-                .flat(),
-        ],
         loader,
-        plugins,
+        plugins: [
+            ...plugins,
+            await esbuildPluginManualChunkBrowser(
+                Object.keys(manualChunks ?? {}),
+                hashKey!
+            ),
+        ],
     })
 }
 
@@ -402,6 +367,7 @@ export async function buildServerEndpoint({
     mode,
     entryPointContent,
     buildPath,
+    hashKey,
     alias,
     plugins,
     loader,
@@ -413,7 +379,7 @@ export async function buildServerEndpoint({
         stdin: {
             contents: entryPointContent,
             resolveDir: currentDirectory,
-            sourcefile: 'server.ts',
+            sourcefile: `server.${hashKey}.mts`,
             loader: 'tsx',
         },
         absWorkingDir: currentDirectory,
@@ -427,14 +393,14 @@ export async function buildServerEndpoint({
         sourcemap: mode === 'development',
         minify: mode === 'production',
         platform: 'node',
-        format: 'cjs',
+        format: 'esm',
         metafile: true,
         treeShaking: true,
         allowOverwrite: true,
         logLevel: config.esbuild.loglevel,
         alias,
         external: [
-            ...Object.entries(alias)
+            ...Object.entries(alias ?? {})
                 .map(([key, value]) => [key, value])
                 .flat(),
         ],

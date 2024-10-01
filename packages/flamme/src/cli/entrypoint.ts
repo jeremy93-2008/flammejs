@@ -149,7 +149,7 @@ export async function createFlammeEntrypoints({
             import path from 'node:path'
             import {
                 StaticRouterProvider
-            } from 'react-router-dom/server'
+            } from 'react-router-dom/server.js'
             import entrypointServer from "${entrypointServerPath}"
             import EntrypointClient from "${entrypointClientPath}"
             import "${defaultCssPath}"

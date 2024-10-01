@@ -36,7 +36,10 @@ export function listenHMRFlamme({
             },
         })
         .on('add', async (path) => {
-            if (path.match(/client\..+\.js$/gi)) {
+            if (
+                path.match(/client\..+\.mjs$/gi) ||
+                path.match(/chunk\..+\.mjs$/gi)
+            ) {
                 return reloadListener()
             }
         })

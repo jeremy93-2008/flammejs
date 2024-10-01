@@ -3,6 +3,7 @@
   "version": "0.0.1-alpha.44",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "dev": "node ../../packages/flamme/dist/cli/index.js dev",
     "dev:debug": "node inspect ../../packages/flamme/dist/cli/index.js dev",
