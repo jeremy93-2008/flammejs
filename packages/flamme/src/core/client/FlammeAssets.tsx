@@ -2,15 +2,24 @@ import React from 'react'
 import { useFlammeAssets } from './useFlammeAssets'
 
 interface IFlammeAssetsProps {
+    noModulePreload?: boolean
     noScript?: boolean
     noStyle?: boolean
 }
 
 export function FlammeAssets(props: IFlammeAssetsProps) {
-    const { noScript, noStyle } = props
+    const { noModulePreload, noScript, noStyle } = props
     const assetsMap = useFlammeAssets()
     return (
         <>
+            {!noModulePreload && (
+                <>
+                    <link
+                        rel="modulepreload"
+                        href={assetsMap['client.js']}
+                    ></link>
+                </>
+            )}
             {!noScript && (
                 <script
                     type="module"
