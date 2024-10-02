@@ -20,7 +20,7 @@ export async function esbuildPluginManualChunkBrowser(
             if (mode === 'production') return
             build.initialOptions.legalComments = 'none'
             build.initialOptions.metafile = true
-            build.onEnd((result) => {
+            build.onEnd(() => {
                 let resultContent = fs.readFileSync(
                     `${config.cacheDir}/client.${hashKey}.mjs`,
                     'utf-8'
