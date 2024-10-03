@@ -209,14 +209,7 @@ async function createAliasExternals(): Promise<{
             'react-router': 'react-router',
         },
         client: {
-            react: 'react',
-            'react-dom': 'react-dom',
-            'react-router-dom': 'react-router-dom',
-            'react-router': 'react-router',
-            scheduler: 'scheduler',
-            '@remix-run/router': '@remix-run/router',
-            h3: 'h3',
-            defu: 'defu',
+            '*': 'client:*',
         },
     }
 }
@@ -353,13 +346,7 @@ export async function buildClientEndpoint({
         allowOverwrite: true,
         logLevel: config.esbuild.loglevel,
         loader,
-        plugins: [
-            ...plugins,
-            await esbuildPluginManualChunkBrowser(
-                Object.keys(manualChunks ?? {}),
-                hashKey!
-            ),
-        ],
+        plugins: [...plugins, await esbuildPluginManualChunkBrowser(hashKey!)],
     })
 }
 

@@ -35,7 +35,7 @@ export default function Index() {
                         className="bg-blue-300 px-3 py-1 rounded-md"
                         onClick={() => setCounter(counter + 1)}
                     >
-                        Increment
+                        Increment counter
                     </button>
                     <p>
                         This is a React component in{' '}

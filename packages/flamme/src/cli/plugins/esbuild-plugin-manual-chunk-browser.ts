@@ -8,7 +8,6 @@ import { hash } from 'ohash'
  * A plugin for esbuild to manual chunk modules by name. This plugin is for browser environment.
  */
 export async function esbuildPluginManualChunkBrowser(
-    manualChunkModulesName: string[],
     hashKey: string
 ): Promise<Plugin> {
     const [mode] = useFlammeBuildMode()
@@ -29,9 +28,9 @@ export async function esbuildPluginManualChunkBrowser(
                 const separatedChunkByFiles = resultContent
                     .split('\n// ')
                     .reduce(
-                        (acc, val) => {
+                        (acc, val, idx) => {
                             const [importLine, ...rest] = val.split('\n')
-                            acc[importLine] = rest.join('\n')
+                            acc[importLine + '___' + idx] = rest.join('\n')
                             return acc
                         },
                         {} as Record<string, string>
@@ -44,13 +43,9 @@ export async function esbuildPluginManualChunkBrowser(
                 const importsToShare: string[] = []
 
                 Object.entries(separatedChunkByFiles).forEach(
-                    ([key, chunk], idx) => {
-                        if (
-                            manualChunkModulesName.filter((name) =>
-                                key.includes(name)
-                            ).length === 0
-                        )
-                            return
+                    ([keyWithIdx, chunk], idx) => {
+                        const key = keyWithIdx.split('___')[0]
+                        if (idx == 0) return
 
                         const hashFile = hash({
                             chunkName: key,
@@ -78,12 +73,34 @@ export async function esbuildPluginManualChunkBrowser(
                                             .trim()
                                     )
                                     return line.replace('var ', 'export var ')
+                                } else if (line.startsWith('function ')) {
+                                    chunkExportedVariables.push(
+                                        line
+                                            .split('(')[0]
+                                            .replace('function ', '')
+                                    )
+                                    return line.replace(
+                                        'function ',
+                                        'export function '
+                                    )
+                                } else if (line.startsWith('async function ')) {
+                                    chunkExportedVariables.push(
+                                        line
+                                            .split('(')[0]
+                                            .replace('async function ', '')
+                                    )
+                                    return line.replace(
+                                        'async function ',
+                                        'export async function '
+                                    )
                                 }
                                 return line
                             })
                             .join('\n')
 
-                        const importSentence = `import { ${chunkExportedVariables.join(', \n')} } from '/chunk/chunk.${hashFile}.mjs';`
+                        const timestamp = Date.now()
+
+                        const importSentence = `import { ${chunkExportedVariables.join(', \n')} } from '/chunk/chunk.${hashFile}.mjs?timestamp=${timestamp}';`
 
                         resultContent = resultContent.replace(
                             originalChunk,
@@ -92,7 +109,8 @@ export async function esbuildPluginManualChunkBrowser(
 
                         fs.outputFileSync(
                             `${config.cacheDir}/chunk/chunk.${hashFile}.mjs`,
-                            topCommonCodeFile +
+                            `var __create = Object.create;\n` +
+                                topCommonCodeFile +
                                 '\n' +
                                 importsToShare.join('\n') +
                                 '\n\n' +
