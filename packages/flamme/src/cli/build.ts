@@ -36,7 +36,6 @@ export interface ISingleBuildEndpointParams {
     buildPath: string
     hashKey?: string
     alias?: Record<string, string>
-    manualChunks?: Record<string, string>
     plugins: Plugin[]
     loader: Record<string, Loader>
 }
@@ -80,7 +79,6 @@ export async function buildEndpoint({
             mode: mode ?? 'development',
             entryPointContent: entryPointClientContent,
             buildPath: buildClientPath,
-            manualChunks: aliasExternals.client,
             hashKey,
             loader,
             plugins,
@@ -196,20 +194,16 @@ async function saveBuildInputFilesToWatch(inputFiles: Record<string, any>) {
 
 async function createAliasExternals(): Promise<{
     server: Record<string, string>
-    client: Record<string, string>
 }> {
     //get mode
     const [mode] = useFlammeBuildMode()
-    if (mode === 'production') return { server: {}, client: {} }
+    if (mode === 'production') return { server: {} }
     return {
         server: {
             react: 'react',
             'react-dom': 'react-dom',
             'react-router-dom': 'react-router-dom',
             'react-router': 'react-router',
-        },
-        client: {
-            '*': 'client:*',
         },
     }
 }
@@ -315,7 +309,6 @@ export async function buildClientEndpoint({
     entryPointContent,
     buildPath,
     hashKey,
-    manualChunks,
     plugins,
     loader,
 }: ISingleBuildEndpointParams) {
