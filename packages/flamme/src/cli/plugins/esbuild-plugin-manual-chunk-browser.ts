@@ -3,6 +3,7 @@ import { useFlammeConfig } from '../../hooks/useFlammeConfig'
 import { useFlammeBuildMode } from '../../hooks/useFlammeBuildMode'
 import * as fs from 'fs-extra'
 import { hash } from 'ohash'
+import path from 'node:path'
 
 /**
  * A plugin for esbuild to manual chunk modules by name. This plugin is for browser environment.
@@ -98,9 +99,10 @@ export async function esbuildPluginManualChunkBrowser(
                             })
                             .join('\n')
 
+                        const friendlyName = path.basename(key).split('.')[0]
                         const timestamp = Date.now()
 
-                        const importSentence = `import { ${chunkExportedVariables.join(', \n')} } from '/chunk/chunk.${hashFile}.mjs?timestamp=${timestamp}';`
+                        const importSentence = `import { ${chunkExportedVariables.join(', \n')} } from '/chunk/${friendlyName}.${hashFile}.mjs?timestamp=${timestamp}';`
 
                         resultContent = resultContent.replace(
                             originalChunk,
@@ -108,7 +110,7 @@ export async function esbuildPluginManualChunkBrowser(
                         )
 
                         fs.outputFileSync(
-                            `${config.cacheDir}/chunk/chunk.${hashFile}.mjs`,
+                            `${config.cacheDir}/chunk/${friendlyName}.${hashFile}.mjs`,
                             `var __create = Object.create;\n` +
                                 topCommonCodeFile +
                                 '\n' +
