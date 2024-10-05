@@ -41,7 +41,12 @@ export async function esbuildPluginManualChunkBrowser(
                     separatedChunkByFiles
                 )[0]
 
-                const importsToShare: string[] = []
+                const importsToShare: {
+                    line: string
+                    imports: string[]
+                    filename: string
+                    timestamp: number
+                }[] = []
 
                 Object.entries(separatedChunkByFiles).forEach(
                     ([keyWithIdx, chunk], idx) => {
@@ -63,7 +68,7 @@ export async function esbuildPluginManualChunkBrowser(
                         const originalChunk = chunk
 
                         const chunkExportedVariables: string[] = []
-                        const globalizeChunk = chunk
+                        const exportedChunk = chunk
                             .split('\n')
                             .map((line) => {
                                 if (line.startsWith('var ')) {
@@ -109,20 +114,39 @@ export async function esbuildPluginManualChunkBrowser(
                             `${importSentence}\n`
                         )
 
-                        fs.outputFileSync(
+                        fs.outputFile(
                             `${config.cacheDir}/chunk/${friendlyName}.${hashFile}.mjs`,
                             `var __create = Object.create;\n` +
                                 topCommonCodeFile +
                                 '\n' +
-                                importsToShare.join('\n') +
+                                importsToShare
+                                    .map((importObj) => ({
+                                        ...importObj,
+                                        imports: importObj.imports.filter(
+                                            (imp) => exportedChunk.includes(imp)
+                                        ),
+                                    }))
+                                    .filter(
+                                        (importObj) =>
+                                            importObj.imports.length > 0
+                                    )
+                                    .map(
+                                        (importObj) =>
+                                            `import { ${importObj.imports.join(', ')} } from '/chunk/${importObj.filename}?timestamp=${importObj.timestamp}';`
+                                    )
+                                    .join('\n') +
                                 '\n\n' +
-                                globalizeChunk
+                                exportedChunk
                         )
 
-                        importsToShare.push(importSentence)
+                        importsToShare.push({
+                            line: importSentence,
+                            imports: chunkExportedVariables,
+                            filename: `${friendlyName}.${hashFile}.mjs`,
+                            timestamp,
+                        })
                     }
                 )
-
                 fs.writeFileSync(
                     `${config.cacheDir}/client.${hashKey}.mjs`,
                     resultContent
